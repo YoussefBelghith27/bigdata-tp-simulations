@@ -7,6 +7,7 @@ G = {
     "install": {"name": "Mise en place", "desc": "Installer le serveur et le shell, préparer Windows et prendre en main mongosh."},
     "query": {"name": "Interroger les données", "desc": "Importer un jeu de données réel et écrire des requêtes de filtrage et de projection."},
     "dist": {"name": "Haute disponibilité et distribution", "desc": "Répliquer les données pour survivre aux pannes, puis les répartir sur plusieurs serveurs."},
+    "wide": {"name": "Bases orientées colonnes", "desc": "Modéliser à partir des requêtes et distribuer les partitions sur un anneau de nœuds."},
 }
 T = [
     dict(id="tp1-installation", group="install", num="TP1", title="Installation de MongoDB 7.0 et de mongosh",
@@ -24,6 +25,11 @@ T = [
          cmds=["mongod --dbpath C:\\mongodb\\tp3\\data\\node1 --port 27017 --replSet rs0", "rs.status()", "sh.shardCollection('universite.etudiants',{matricule:1})", "db.etudiants.getShardDistribution()"],
          cr="cr/CR_TP3_Replication_Sharding.pdf", approj="activepresenter/TP3_Replication_Sharding_Simulation.approj",
          tool="mongod · mongos · mongosh", origin="Sorties mongosh réelles, fenêtres mongod reconstituées", real=False),
+    dict(id="tp4-cassandra", group="wide", num="TP4", title="Cassandra : CQL, modélisation et cluster à 3 nœuds",
+         desc="Cluster ClusterRSI3 de 3 conteneurs cassandra:4.1 sous Docker Desktop, nodetool status, keyspace rsi3_bibliotheque en RF = 3, tables livres_par_auteur et ventes_par_livre, CRUD, refus de la recherche par titre (ALLOW FILTERING), table livres_par_titre, puis arrêt et retour de cassandra3.",
+         cmds=["docker compose up -d", "docker exec -it cassandra1 nodetool status", "PRIMARY KEY ((isbn), date_vente, id_vente)", "docker stop cassandra3"],
+         cr="cr/CR_TP4_Cassandra.pdf", approj="activepresenter/TP4_Cassandra_Simulation.approj",
+         tool="Docker Desktop · Cassandra 4.1 · cqlsh", origin="Docker réel (mon poste), sorties cqlsh/nodetool reconstituées", real=False),
 ]
 for t in T:
     if not t.get("soon"):

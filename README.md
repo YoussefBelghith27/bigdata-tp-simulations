@@ -15,6 +15,7 @@ Chaque TP propose :
 | TP1 | Installation de MongoDB 7.0 et de mongosh sous Windows 11 | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp1-installation) | [PDF](cr/CR_TP1_Installation_MongoDB.pdf) | [.approj](activepresenter/TP1_Installation_MongoDB_Simulation.approj) |
 | TP2 | Requêtes MongoDB sur la base Restaurants (mongoimport + 26 requêtes) | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp2-resto) | [PDF](cr/CR_TP2_Requetes_Restaurants.pdf) | [.approj](activepresenter/TP2_Requetes_Restaurants_Simulation.approj) |
 | TP3 | Haute disponibilité et sharding (Replica Set, failover, cluster shardé) | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp3-replication-sharding) | [PDF](cr/CR_TP3_Replication_Sharding.pdf) | [.approj](activepresenter/TP3_Replication_Sharding_Simulation.approj) |
+| TP4 | Cassandra : CQL, modélisation et cluster Docker à 3 nœuds | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp4-cassandra) | [PDF](cr/CR_TP4_Cassandra.pdf) | [.approj](activepresenter/TP4_Cassandra_Simulation.approj) |
 
 ## TP1 en bref
 
@@ -50,6 +51,22 @@ La sortie réelle des requêtes, exécutées sur mon poste, est dans [`tp2/sorti
 
 Les sorties réelles sont dans [`tp3/sortie_mongosh_reelle.txt`](tp3/sortie_mongosh_reelle.txt).
 
+## TP4 en bref
+
+37 diapositives, 26 saisies, dans PowerShell et cqlsh.
+
+1. `docker compose up -d` lance 3 conteneurs `cassandra:4.1`. `nodetool status` montre 3 nœuds UN.
+2. Keyspace `rsi3_bibliotheque` (NetworkTopologyStrategy, RF = 3), avec les tables `livres_par_auteur` et `ventes_par_livre`.
+3. CRUD (INSERT, SELECT, UPDATE, DELETE avec clé complète) et recherche par titre refusée sans `ALLOW FILTERING`. La table `livres_par_titre` est alimentée par BATCH et les tokens Murmur3 sont affichés.
+4. `nodetool describecluster` et journaux de cassandra2, puis `docker stop cassandra3` (DN) et `docker start cassandra3` (retour à UN).
+
+Origine des sorties :
+- `docker --version`, `docker compose up -d` et les journaux viennent de mon poste (dossier [`tp4/logs_docker_reels/`](tp4/logs_docker_reels)), tout comme le problème réel de collision de tokens traité dans le compte rendu.
+- Les sorties `cqlsh` et `nodetool` sont reconstituées au format de Cassandra 4.1.
+- Les tokens Murmur3 sont calculés.
+
+Le fichier CQL complet est [`tp4/TP4_Requetes.cql`](tp4/TP4_Requetes.cql).
+
 ## Organisation des fichiers
 
 ```
@@ -59,7 +76,7 @@ assets/               styles, catalogue des TP, lecteur
 sims/                 données de chaque simulation (écrans + interactions)
 cr/                   comptes rendus PDF
 activepresenter/      projets ActivePresenter (.approj)
-tp1/ … tp3/           captures du compte rendu et sorties réelles de mongosh
+tp1/ … tp4/           captures du compte rendu et sorties réelles de mongosh
 tools/                scripts de génération (écrans, simulation, .approj, PDF)
 ```
 

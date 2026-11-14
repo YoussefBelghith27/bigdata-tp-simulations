@@ -1,0 +1,59 @@
+﻿PS> docker compose up -d
+ Image cassandra:4.1 Pulling 
+ Image cassandra:4.1 Pulling 
+ Image cassandra:4.1 Pulling 
+ 6ff7705f8294 Pulling fs layer 0B
+ 24428d90ee7e Pulling fs layer 0B
+ 6cb2a2b4b07d Pulling fs layer 0B
+ dd051e1b8c92 Pulling fs layer 0B
+ 907d2c714993 Pulling fs layer 0B
+ 6627cff60045 Pulling fs layer 0B
+ c0b0de39e9e0 Pulling fs layer 0B
+ a2dfbe9174d7 Pulling fs layer 0B
+ 6ff7705f8294 Pulling fs layer 0B
+ dd051e1b8c92 Pulling fs layer 0B
+ 24428d90ee7e Pulling fs layer 0B
+ 907d2c714993 Pulling fs layer 0B
+ 6627cff60045 Pulling fs layer 0B
+ a2dfbe9174d7 Pulling fs layer 0B
+ c0b0de39e9e0 Pulling fs layer 0B
+ 6cb2a2b4b07d Pulling fs layer 0B
+ 6ff7705f8294 Pulling fs layer 0B
+ 24428d90ee7e Pulling fs layer 0B
+ 6627cff60045 Pulling fs layer 0B
+ a2dfbe9174d7 Pulling fs layer 0B
+ c0b0de39e9e0 Pulling fs layer 0B
+ 907d2c714993 Pulling fs layer 0B
+ 6cb2a2b4b07d Pulling fs layer 0B
+ dd051e1b8c92 Pulling fs layer 0B
+ Image cassandra:4.1 Pulled 
+ Image cassandra:4.1 Pulled 
+ Image cassandra:4.1 Pulled 
+ Network tp_cassandra_rsi3_cassandra-net Creating 
+ Volume tp_cassandra_rsi3_cassandra3-data Creating 
+ Volume tp_cassandra_rsi3_cassandra1-data Creating 
+ Volume tp_cassandra_rsi3_cassandra2-data Creating 
+ Volume tp_cassandra_rsi3_cassandra2-data Creating 
+ Volume tp_cassandra_rsi3_cassandra1-data Creating 
+ Volume tp_cassandra_rsi3_cassandra3-data Creating 
+ Network tp_cassandra_rsi3_cassandra-net Creating 
+ Volume tp_cassandra_rsi3_cassandra3-data Created 
+ Volume tp_cassandra_rsi3_cassandra3-data Created 
+ Volume tp_cassandra_rsi3_cassandra1-data Created 
+ Volume tp_cassandra_rsi3_cassandra1-data Created 
+ Volume tp_cassandra_rsi3_cassandra2-data Created 
+ Volume tp_cassandra_rsi3_cassandra2-data Created 
+ Network tp_cassandra_rsi3_cassandra-net Created 
+ Network tp_cassandra_rsi3_cassandra-net Created 
+ Container cassandra1 Creating 
+ Container cassandra1 Created 
+ Container cassandra3 Creating 
+ Container cassandra2 Creating 
+ Container cassandra2 Created 
+ Container cassandra3 Created 
+ Container cassandra1 Starting 
+ Container cassandra1 Started 
+ Container cassandra3 Starting 
+ Container cassandra2 Starting 
+ Container cassandra3 Started 
+ Container cassandra2 Started 

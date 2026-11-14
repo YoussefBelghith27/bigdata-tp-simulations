@@ -16,5 +16,11 @@
   "commands": 56,
   "clicks": 0,
   "size_kb": 4811
+ },
+ "tp4-cassandra": {
+  "slides": 37,
+  "commands": 26,
+  "clicks": 0,
+  "size_kb": 2495
  }
 }

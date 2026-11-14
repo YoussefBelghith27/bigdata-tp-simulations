@@ -11,6 +11,10 @@ window.CATALOG = {
   "dist": {
    "name": "Haute disponibilité et distribution",
    "desc": "Répliquer les données pour survivre aux pannes, puis les répartir sur plusieurs serveurs."
+  },
+  "wide": {
+   "name": "Bases orientées colonnes",
+   "desc": "Modéliser à partir des requêtes et distribuer les partitions sur un anneau de nœuds."
   }
  },
  "tps": [
@@ -75,6 +79,27 @@ window.CATALOG = {
    "real": false,
    "slides": 73,
    "commands": 56,
+   "clicks": 0
+  },
+  {
+   "id": "tp4-cassandra",
+   "group": "wide",
+   "num": "TP4",
+   "title": "Cassandra : CQL, modélisation et cluster à 3 nœuds",
+   "desc": "Cluster ClusterRSI3 de 3 conteneurs cassandra:4.1 sous Docker Desktop, nodetool status, keyspace rsi3_bibliotheque en RF = 3, tables livres_par_auteur et ventes_par_livre, CRUD, refus de la recherche par titre (ALLOW FILTERING), table livres_par_titre, puis arrêt et retour de cassandra3.",
+   "cmds": [
+    "docker compose up -d",
+    "docker exec -it cassandra1 nodetool status",
+    "PRIMARY KEY ((isbn), date_vente, id_vente)",
+    "docker stop cassandra3"
+   ],
+   "cr": "cr/CR_TP4_Cassandra.pdf",
+   "approj": "activepresenter/TP4_Cassandra_Simulation.approj",
+   "tool": "Docker Desktop · Cassandra 4.1 · cqlsh",
+   "origin": "Docker réel (mon poste), sorties cqlsh/nodetool reconstituées",
+   "real": false,
+   "slides": 37,
+   "commands": 26,
    "clicks": 0
   }
  ]
