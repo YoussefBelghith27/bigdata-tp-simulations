@@ -3,10 +3,10 @@ import json, base64, io, pathlib, sys
 from PIL import Image
 from render import Renderer
 from screens import CSS
-import story
-
-SIM_ID = "tp1-installation"
-OUT = pathlib.Path("/home/claude/tp1/build"); (OUT / "png").mkdir(parents=True, exist_ok=True); (OUT / "cap").mkdir(exist_ok=True)
+import importlib
+story = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "story")
+SIM_ID = sys.argv[2] if len(sys.argv) > 2 else "tp1-installation"
+OUT = pathlib.Path(sys.argv[3] if len(sys.argv) > 3 else "/home/claude/tp1/build"); (OUT / "png").mkdir(parents=True, exist_ok=True); (OUT / "cap").mkdir(exist_ok=True)
 
 slides_out, images, keymap, meta, caps = [], [], {}, [], []
 with Renderer() as r:

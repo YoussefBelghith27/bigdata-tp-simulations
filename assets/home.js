@@ -5,7 +5,7 @@
 
   const nS = ready.reduce((a, t) => a + t.slides, 0), nC = ready.reduce((a, t) => a + t.commands, 0), nK = ready.reduce((a, t) => a + (t.clicks || 0), 0);
   document.getElementById("totals").textContent =
-    `${ready.length} TP disponible${ready.length > 1 ? "s" : ""} : ${nS} diapositives, ${nC} saisies et ${nK} clics guidés, sans rien installer.`;
+    `${ready.length} TP disponible${ready.length > 1 ? "s" : ""} : ${nS} diapositives, ${nC} saisies${nK ? ` et ${nK} clics guidés` : ""}, sans rien installer.`;
 
   const ICON = {
     play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></svg>',
@@ -23,7 +23,7 @@
       const art = document.createElement("article");
       art.className = "tp" + (t.soon ? " soon" : ""); art.id = t.id;
       const facts = t.soon ? `<span class="badge soon">Bientôt disponible</span>` :
-        `<span>${t.slides} diapositives</span><span>${t.commands} saisies</span><span>${t.clicks} clics guidés</span><span class="badge">${esc(t.origin)}</span>`;
+        `<span>${t.slides} diapositives</span><span>${t.commands} saisies</span>${t.clicks ? `<span>${t.clicks} clics guidés</span>` : ""}<span class="badge">${esc(t.origin)}</span>`;
       const actions = t.soon ? `<a class="btn btn-primary" aria-disabled="true">${ICON.play}Simulation à venir</a>` : `
           <a class="btn btn-primary" href="simulation.html?tp=${t.id}">${ICON.play}Lancer la simulation</a>
           <a class="btn" href="${t.cr}" target="_blank" rel="noopener">${ICON.doc}Compte rendu (PDF)</a>

@@ -40,15 +40,21 @@ window.CATALOG = {
    "id": "tp2-resto",
    "group": "query",
    "num": "TP2",
-   "title": "Requêtes sur la collection restaurants",
-   "desc": "Import de restaurants.json avec mongoimport, puis 26 requêtes : projections, opérateurs de comparaison, $elemMatch, expressions régulières, $in / $nin et $exists.",
+   "title": "Requêtes MongoDB sur la base Restaurants",
+   "desc": "Import de restaurants.json (3772 documents) avec mongoimport, puis les 26 requêtes de l'énoncé : projections, pagination, $gt / $lt / $ne, $elemMatch, positions dans les tableaux, $in / $nin / $not / $or, expressions régulières, tri et $exists.",
    "cmds": [
-    "mongoimport",
-    "$elemMatch",
-    "$regex"
+    "mongoimport --db Restaurants --collection restaurant --file restaurants.json",
+    "{ grades: { $elemMatch: { score: { $gt: 80, $lt: 100 } } } }",
+    "{ name: /^Mad/ }"
    ],
-   "tool": "mongosh · Database Tools",
-   "soon": true
+   "cr": "cr/CR_TP2_Requetes_Restaurants.pdf",
+   "approj": "activepresenter/TP2_Requetes_Restaurants_Simulation.approj",
+   "tool": "mongosh 2.12 · Database Tools 100.19",
+   "origin": "Sorties mongosh réelles (mon poste), écrans Windows reconstitués",
+   "real": false,
+   "slides": 41,
+   "commands": 38,
+   "clicks": 0
   },
   {
    "id": "tp3-replication-sharding",

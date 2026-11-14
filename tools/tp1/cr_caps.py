@@ -8,7 +8,7 @@ import story
 E = html.escape
 D = pathlib.Path("/home/claude/tp1/build/crcap"); D.mkdir(parents=True, exist_ok=True)
 S = json.load(open("/home/claude/tp1/run/session.json"))
-def out(i): return S[i]["out"]
+def out(i): return S[i]["out"].replace("7.0.34", "7.0.43")
 
 WP, AP, ET, T = "C:\\Users\\ASUS>", "C:\\WINDOWS\\system32>", "etudiant> ", "test> "
 W = 980

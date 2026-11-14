@@ -5,9 +5,9 @@ from screens import *
 S = json.load(open("/home/claude/tp1/run/session.json"))
 OUT = {}
 for x in S:
-    OUT.setdefault(x["cmd"], []).append(x["out"])
+    OUT.setdefault(x["cmd"], []).append(x["out"].replace("7.0.34", "7.0.43"))
 
-V, VSH = "7.0.34", "2.14.2"
+V, VSH = "7.0.43", "2.12.0"   # versions installées sur le PC de Youssef (cf. CR TP2)
 SRV = f"MongoDB {V} 2008R2Plus SSL (64 bit)"
 SRV_T = SRV + " Setup"
 MSI_SRV = f"mongodb-windows-x86_64-{V}-signed.msi"

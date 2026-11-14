@@ -219,12 +219,13 @@ def browser(url, title, page, focus=False, typed=None, x=40, y=96, w=1162, h=860
 def mdb_page(product, version_label, platform, package, open_menu=None, t=None, items=None):
     """Page de téléchargement reconstituée. t = 'version' | item index | 'download'."""
     def tg(k): return ' data-t' if t == k else ''
-    if product == "server":
-        h1, desc = "MongoDB Community Server Download", "La version Community de notre base de données distribuée. Elle offre un modèle de données orienté documents flexible, la prise en charge des requêtes ad hoc, l'indexation secondaire et l'agrégation en temps réel."
-        fields = [("Version", version_label, "version"), ("Platform", platform, None), ("Package", package, None)]
-    else:
-        h1, desc = "MongoDB Shell Download", "mongosh est un environnement JavaScript et Node.js entièrement fonctionnel pour interagir avec les déploiements MongoDB. Il permet de tester des requêtes et des opérations directement sur la base de données."
-        fields = [("Version", version_label, "version"), ("Platform", platform, None), ("Package", package, None)]
+    PAGES = {
+        "server": ("MongoDB Community Server Download", "La version Community de notre base de données distribuée. Elle offre un modèle de données orienté documents flexible, la prise en charge des requêtes ad hoc, l'indexation secondaire et l'agrégation en temps réel.", "MongoDB Community Server"),
+        "shell": ("MongoDB Shell Download", "mongosh est un environnement JavaScript et Node.js entièrement fonctionnel pour interagir avec les déploiements MongoDB. Il permet de tester des requêtes et des opérations directement sur la base de données.", "MongoDB Shell"),
+        "tools": ("MongoDB Command Line Database Tools Download", "Les Database Tools regroupent les utilitaires en ligne de commande pour travailler avec un déploiement MongoDB : mongoimport, mongoexport, mongodump, mongorestore, bsondump, mongostat, mongotop et mongofiles.", "MongoDB Database Tools"),
+    }
+    h1, desc, cardt = PAGES[product]
+    fields = [("Version", version_label, "version"), ("Platform", platform, None), ("Package", package, None)]
     sels = ""
     for lab, val, key in fields:
         badge = '<span class="badge">current</span>' if (key == "version" and val.startswith("8.")) else ""
@@ -237,9 +238,9 @@ def mdb_page(product, version_label, platform, package, open_menu=None, t=None, 
         menu = f'<div class="menu" style="left:{1162-28-410+20}px;top:{54+26+18+22+28+4}px;width:370px">{rows}</div>'
     return f"""<div class="mhead"><span class="brand">mongodb.com</span><span style="color:#889397">|</span><span>Download Center</span><span>Products</span><span>Resources</span><span>Solutions</span><span>Company</span><span style="margin-left:auto">Sign In</span></div>
       <div class="mhero"><div><h1>{h1}</h1><p>{desc}</p></div>
-      <div class="card"><div style="font-weight:700;font-size:15px">{'MongoDB Community Server' if product=='server' else 'MongoDB Shell'}</div>{sels}
+      <div class="card"><div style="font-weight:700;font-size:15px">{cardt}</div>{sels}
       <div class="dl"><span class="dlb"{tg('download')}>Download</span><span class="dll">Copy link</span><span class="dll">More Options ⋯</span></div></div></div>
-      <div class="mbody">{'<b>Archived releases</b> · Release notes · Changelog' if product=='server' else 'Documentation mongosh · Release notes'}</div>{menu}"""
+      <div class="mbody">{'<b>Archived releases</b> · Release notes · Changelog' if product=='server' else 'Documentation · Release notes'}</div>{menu}"""
 
 def dl_flyout(fname, size, t=False):
     return f"""<div class="flyout"><div style="display:flex;justify-content:space-between;font-weight:600;margin-bottom:10px">Téléchargements<span style="font-weight:400">📁 ⋯ ✕</span></div>

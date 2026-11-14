@@ -4,5 +4,11 @@
   "commands": 50,
   "clicks": 29,
   "size_kb": 3714
+ },
+ "tp2-resto": {
+  "slides": 41,
+  "commands": 38,
+  "clicks": 0,
+  "size_kb": 2326
  }
 }

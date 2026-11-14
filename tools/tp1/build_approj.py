@@ -8,7 +8,8 @@ from PIL import Image
 
 TEMPLATE = "/home/claude/wan-tp-simulations/activepresenter/TP2_VPN_MPLS_Simulation.approj"
 OUT = sys.argv[1] if len(sys.argv) > 1 else "/home/claude/tp1/build/TP1_Installation_MongoDB_Simulation.approj"
-META = json.load(open("/home/claude/tp1/build/slides_meta.json"))
+META = json.load(open(sys.argv[2] if len(sys.argv) > 2 else "/home/claude/tp1/build/slides_meta.json"))
+DESC = sys.argv[3] if len(sys.argv) > 3 else "TP1 Big Data Avancée – Installation de MongoDB 7.0 et mongosh (Youssef Belghith)"
 E = html.escape
 
 def load(s):  # garde les entiers « +N » propres à ActivePresenter
@@ -78,7 +79,7 @@ for k, m in enumerate(META):
     c.execute("insert into slides(proj_id,cont_id,[index],name,contents,thumbnail) values(1,0,?,?,?,NULL)", (k, d["name"], dump(d)))
 
 name = pathlib.Path(OUT).stem
-c.execute("update projects set name=?, description=?, author=?, modified=CURRENT_TIMESTAMP", (name, "TP1 Big Data Avancée – Installation de MongoDB 7.0 et mongosh (Youssef Belghith)", "Youssef Belghith"))
+c.execute("update projects set name=?, description=?, author=?, modified=CURRENT_TIMESTAMP", (name, DESC, "Youssef Belghith"))
 c.commit()
 c.execute("vacuum")
 c.close()
