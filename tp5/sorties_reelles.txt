@@ -1,0 +1,39 @@
+Sortie réelle PySpark 3.5.3 (spark_rdd.py, local[2]) :
+Sfax	9138
+Kairouan	4631
+Tunis	16695
+Bizerte	5227
+Tozeur	2247
+Hammamet	6872
+Djerba	6133
+Monastir	5374
+Gabes	3031
+Mahdia	3838
+Sousse	9188
+Nabeul	7626
+
+Comptage par ville (mapper.py | sort | reducer.py) :
+Bizerte	5227
+Djerba	6133
+Gabes	3031
+Hammamet	6872
+Kairouan	4631
+Mahdia	3838
+Monastir	5374
+Nabeul	7626
+Sfax	9138
+Sousse	9188
+Tozeur	2247
+Tunis	16695
+
+Moyenne par cuisine (mapper_cuisine.py | sort | reducer_moyenne.py) :
+Asiatique	3.61
+Fast-food	3.1
+Francaise	3.9
+Fruits de mer	4.0
+Grill	3.8
+Italienne	3.79
+Libanaise	3.69
+Pizzeria	3.49
+Tunisienne	4.08
+Turque	3.6

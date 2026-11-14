@@ -21,6 +21,12 @@
   "slides": 37,
   "commands": 26,
   "clicks": 0,
-  "size_kb": 2495
+  "size_kb": 3146
+ },
+ "tp5-hadoop": {
+  "slides": 60,
+  "commands": 50,
+  "clicks": 0,
+  "size_kb": 4090
  }
 }

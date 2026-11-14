@@ -12,6 +12,11 @@ IP = {"cassandra1": "172.18.0.2", "cassandra2": "172.18.0.4", "cassandra3": "172
 HID = {"cassandra1": "3f6c1a2e-8b4d-4e1f-9a57-2c0d6e9b1a43", "cassandra2": "a81d5c07-4f2e-49b3-b6c8-71e0f3d29c15", "cassandra3": "d2b94e61-0c7a-4a8f-85d3-9e46b17f0c28"}
 
 slides = []
+def sclear(c):
+    """Efface l'écran en gardant la dernière commande et sa sortie."""
+    ps = [E(p) for p in (DIRP, CQ, CK)]
+    idx = [i for i, l in enumerate(c.lines) if any(l.startswith(p) for p in ps)]
+    if idx: c.lines = c.lines[idx[-1]:]
 LOG = []   # (prompt, cmd, out, cap) pour le compte rendu
 def dur(text, base=3200): return max(5200, min(11000, base + 55 * len(text)))
 def show(html, step, text, d=None, cap=None): slides.append(dict(html=html, step=step, text=text, kind="show", dur=d or dur(text), cap=cap))
@@ -105,7 +110,7 @@ tcon(ps, CK, P2, "2 ventes insérées. Affichez les ventes du livre 2154889589."
 
 # ================================================================= 3. CRUD
 P3 = "3 · CRUD et requêtes"
-ps.clear()
+sclear(ps)
 pre(ps, CK, "INSERT INTO livres_par_auteur (id_auteur, isbn, nom_auteur, prenom_auteur, titre)\nVALUES (154, '2154889530', 'Goscinny', 'Rene', 'Asterix le Gaulois');", "",
     P3, "Les dates sorties triées de la plus récente à la plus ancienne. Travail 1 : troisième livre pour l'auteur 154 (ISBN 2154889530).")
 A154 = [r for r in LA if r[0] == "154"] + [("154", "2154889530", "Goscinny", "Rene", "Asterix le Gaulois")]
@@ -118,7 +123,7 @@ tcon(ps, CK, P3, "Vérifiez la modification.", ["SELECT * FROM livres_par_auteur
 tcon(ps, CK, P3, "Titre modifié. Travail 4 : supprimez ce livre.", ["DELETE FROM livres_par_auteur WHERE id_auteur = 154 AND isbn = '2154889530';", "delete from livres_par_auteur where id_auteur = 154 and isbn = '2154889530';"], "")
 tcon(ps, CK, P3, "Vérifiez sa disparition.", ["SELECT * FROM livres_par_auteur WHERE id_auteur = 154;", "select * from livres_par_auteur where id_auteur = 154;", "SELECT * FROM livres_par_auteur WHERE id_auteur=154;"],
      table(CLA, [LA[0]]), cap="delete")
-ps.clear()
+sclear(ps)
 pre(ps, CK, "INSERT INTO ventes_par_livre (isbn, date_vente, id_vente, quantite, montant)\nVALUES ('2154889589', '2017-11-20', 25, 3, 105.00);", "",
     P3, "Seul « Asterix et Cleopatre » reste. Travail 5 : nouvelle vente pour le livre 2154889589.")
 V1 = V0 + [("2154889589", "2017-11-20", "25", "105.00", "3")]
@@ -129,7 +134,7 @@ tcon(ps, CK, P3, "La vente du 20/11 apparaît en tête. Travail 6 : cherchez un 
      ["SELECT * FROM livres_par_auteur WHERE titre = 'NoSQL';", "select * from livres_par_auteur where titre = 'NoSQL';", "SELECT * FROM livres_par_auteur WHERE titre='NoSQL';"], ERR, cap="filtering")
 tcon(ps, CK, P3, "Refusé : titre n'est pas dans la clé, Cassandra devrait parcourir toutes les partitions. Forcez avec ALLOW FILTERING.",
      ["SELECT * FROM livres_par_auteur WHERE titre = 'NoSQL' ALLOW FILTERING;", "select * from livres_par_auteur where titre = 'NoSQL' allow filtering;"], table(CLA, [LA[1]]))
-ps.clear()
+sclear(ps)
 pre(ps, CK, "CREATE TABLE IF NOT EXISTS livres_par_titre (\n  titre text, isbn text, id_auteur int, nom_auteur text, prenom_auteur text,\n  PRIMARY KEY ((titre), isbn)\n);", "",
     P3, "Ça marche mais scanne tout le cluster. Travail 7 : une table dédiée, partitionnée par titre.")
 bat = "BEGIN BATCH\n" + "\n".join(f"  INSERT INTO livres_par_titre (titre, isbn, id_auteur, nom_auteur, prenom_auteur) VALUES ('{t}', '{i}', {a}, '{n}', '{p}');" for a, i, n, p, t in LA) + "\nAPPLY BATCH;"
@@ -144,7 +149,7 @@ tcon(ps, CK, P3, "Le token détermine les nœuds responsables de chaque partitio
 
 # ================================================================= 4. Cluster
 P4 = "4 · Observation du cluster"
-ps.clear()
+sclear(ps)
 tcon(ps, DIRP, P4, "Revoyez l'état du cluster pour le keyspace du TP.", ["docker exec -it cassandra1 nodetool status rsi3_bibliotheque", "docker exec -it cassandra1 nodetool status"],
      nodetool_status(UN3), cap="status_ks")
 DC = f"""Cluster Information:
@@ -182,7 +187,7 @@ c2 = [l for l in raw if l.startswith("cassandra2")]
 keep = [l for l in c2 if any(k in l for k in ["state jump to NORMAL", "No gossip backlog", "Ensured sufficient", "Starting listening for CQL", "Startup complete", "changing ownership"])][:8]
 tcon(ps, DIRP, P4, "Un seul schéma, 3 nœuds vivants, rsi3_bibliotheque en NetworkTopologyStrategy. Consultez les journaux de cassandra2.",
      ["docker compose logs --tail=50 cassandra2"], "\n".join(l[:300] for l in keep) + "\n", cap="logs")
-ps.clear()
+sclear(ps)
 tcon(ps, DIRP, P4, "Extrait réel : cassandra2 passe NORMAL puis « Startup complete ». Arrêtez le troisième nœud.", ["docker stop cassandra3"], "cassandra3\n")
 DN = dict(UN3, cassandra3="DN")
 tcon(ps, DIRP, P4, "Relancez nodetool status.", ["docker exec -it cassandra1 nodetool status rsi3_bibliotheque", "docker exec -it cassandra1 nodetool status"], nodetool_status(DN), cap="status_dn")

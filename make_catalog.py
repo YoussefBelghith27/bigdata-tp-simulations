@@ -7,6 +7,7 @@ G = {
     "install": {"name": "Mise en place", "desc": "Installer le serveur et le shell, préparer Windows et prendre en main mongosh."},
     "query": {"name": "Interroger les données", "desc": "Importer un jeu de données réel et écrire des requêtes de filtrage et de projection."},
     "dist": {"name": "Haute disponibilité et distribution", "desc": "Répliquer les données pour survivre aux pannes, puis les répartir sur plusieurs serveurs."},
+    "hadoop": {"name": "Écosystème Hadoop", "desc": "Stocker sur HDFS, allouer avec YARN, calculer avec MapReduce, Spark et Hive."},
     "wide": {"name": "Bases orientées colonnes", "desc": "Modéliser à partir des requêtes et distribuer les partitions sur un anneau de nœuds."},
 }
 T = [
@@ -30,6 +31,11 @@ T = [
          cmds=["docker compose up -d", "docker exec -it cassandra1 nodetool status", "PRIMARY KEY ((isbn), date_vente, id_vente)", "docker stop cassandra3"],
          cr="cr/CR_TP4_Cassandra.pdf", approj="activepresenter/TP4_Cassandra_Simulation.approj",
          tool="Docker Desktop · Cassandra 4.1 · cqlsh", origin="Docker réel (mon poste), sorties cqlsh/nodetool reconstituées", real=False),
+    dict(id="tp5-hadoop", group="hadoop", num="TP5", title="Cluster Hadoop : HDFS, YARN, MapReduce, Spark et Hive",
+         desc="Cluster Docker de 1 master et 3 workers : validation, HDFS (import, quotas, corbeille, snapshots), blocs et panne d'un DataNode, limites YARN, MapReduce Streaming en Python, Spark sur YARN puis Hive : le même comptage par ville avec les trois moteurs.",
+         cmds=["hdfs dfsadmin -report", "hdfs fsck /user/student/input/restaurants.csv -files -blocks -locations", "hadoop jar hadoop-streaming-3.3.6.jar ...", "spark-submit --master yarn spark_rdd.py"],
+         cr="cr/CR_TP5_Hadoop_Spark_Hive.pdf", approj="activepresenter/TP5_Hadoop_Spark_Hive_Simulation.approj",
+         tool="Hadoop 3.3.6 · Spark 3.5.3 · Hive 3.1.3", origin="Calculs réels (scripts, PySpark), messages Hadoop reconstitués", real=False),
 ]
 for t in T:
     if not t.get("soon"):

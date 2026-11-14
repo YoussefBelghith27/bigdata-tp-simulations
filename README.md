@@ -16,6 +16,7 @@ Chaque TP propose :
 | TP2 | Requêtes MongoDB sur la base Restaurants (mongoimport + 26 requêtes) | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp2-resto) | [PDF](cr/CR_TP2_Requetes_Restaurants.pdf) | [.approj](activepresenter/TP2_Requetes_Restaurants_Simulation.approj) |
 | TP3 | Haute disponibilité et sharding (Replica Set, failover, cluster shardé) | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp3-replication-sharding) | [PDF](cr/CR_TP3_Replication_Sharding.pdf) | [.approj](activepresenter/TP3_Replication_Sharding_Simulation.approj) |
 | TP4 | Cassandra : CQL, modélisation et cluster Docker à 3 nœuds | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp4-cassandra) | [PDF](cr/CR_TP4_Cassandra.pdf) | [.approj](activepresenter/TP4_Cassandra_Simulation.approj) |
+| TP5 | Cluster Hadoop : HDFS, YARN, MapReduce, Spark et Hive | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp5-hadoop) | [PDF](cr/CR_TP5_Hadoop_Spark_Hive.pdf) | [.approj](activepresenter/TP5_Hadoop_Spark_Hive_Simulation.approj) |
 
 ## TP1 en bref
 
@@ -67,6 +68,20 @@ Origine des sorties :
 
 Le fichier CQL complet est [`tp4/TP4_Requetes.cql`](tp4/TP4_Requetes.cql).
 
+## TP5 en bref
+
+60 diapositives, 50 saisies, dans le terminal de la VM Ubuntu, le conteneur hadoop-master et Beeline.
+
+1. Le cluster compte 3 DataNodes et 3 NodeManagers (validé avec jps).
+2. HDFS : import et `-du`, quota dépassé (un bloc de 128 Mo est réservé par réplique), corbeille, snapshot.
+3. Blocs et panne : 1 bloc pour le CSV, 22 blocs de 1 Mo pour gros.txt, arrêt de hadoop-worker1 sans perte de lecture.
+4. YARN refuse 8192 Mo par map, puis `pi` réussit (3.14000000000000000000).
+5. Comptage par ville en Hadoop Streaming, puis Spark sur YARN et Hive donnent les mêmes 12 effectifs.
+
+Origine des sorties :
+- Les calculs sont réels : scripts Python exécutés, sortie PySpark, agrégats calculés sur le CSV et `pi` recalculé avec la séquence de Halton de Hadoop (voir [`tp5/sorties_reelles.txt`](tp5/sorties_reelles.txt)).
+- Les messages HDFS, YARN et Hive sont reconstitués.
+
 ## Organisation des fichiers
 
 ```
@@ -76,7 +91,7 @@ assets/               styles, catalogue des TP, lecteur
 sims/                 données de chaque simulation (écrans + interactions)
 cr/                   comptes rendus PDF
 activepresenter/      projets ActivePresenter (.approj)
-tp1/ … tp4/           captures du compte rendu et sorties réelles de mongosh
+tp1/ … tp5/           captures du compte rendu et sorties réelles de mongosh
 tools/                scripts de génération (écrans, simulation, .approj, PDF)
 ```
 
