@@ -1,0 +1,456 @@
+test> db.version()
+7.0.34
+
+test> db
+test
+
+test> show dbs
+admin    8.00 KiB
+config  12.00 KiB
+local    8.00 KiB
+
+test> use etudiant
+switched to db etudiant
+
+etudiant> db.etudiants.insertOne({ nom: "Ben Ali", prenom: "Sami", age: 21, filiere: "Reseaux", niveau: "L3" })
+{
+  acknowledged: true,
+  insertedId: ObjectId('6af848e218fad712c6a303cc')
+}
+
+etudiant> db.etudiants.insertMany([ { nom: "Trabelsi", prenom: "Amira", age: 20, filiere: "Reseaux", niveau: "L3", moyenne: 14.5 }, { nom: "Gharbi", prenom: "Yassine", age: 22, filiere: "Informatique", niveau: "L3", moyenne: 12 }, { nom: "Mansour", prenom: "Lina", age: 21, filiere: "Reseaux", niveau: "L2", moyenne: 16 }, { nom: "Jlassi", prenom: "Omar", age: 23, filiere: "Informatique", niveau: "L3", moyenne: 9.5 } ])
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('6af848e3b4bafa42a73331e1'),
+    '1': ObjectId('6af848e3b4bafa42a73331e2'),
+    '2': ObjectId('6af848e3b4bafa42a73331e3'),
+    '3': ObjectId('6af848e3b4bafa42a73331e4')
+  }
+}
+
+etudiant> show dbs
+admin      8.00 KiB
+config    12.00 KiB
+etudiant   8.00 KiB
+local      8.00 KiB
+
+etudiant> show collections
+etudiants
+
+etudiant> db.etudiants.countDocuments()
+5
+
+etudiant> db.stats()
+{
+  db: 'etudiant',
+  collections: Long('1'),
+  views: Long('0'),
+  objects: Long('5'),
+  avgObjSize: 115.6,
+  dataSize: 578,
+  storageSize: 4096,
+  indexes: Long('1'),
+  indexSize: 4096,
+  totalSize: 8192,
+  scaleFactor: Long('1'),
+  fsUsedSize: 239597477888,
+  fsTotalSize: 270553174016,
+  ok: 1
+}
+
+etudiant> db.etudiants.find()
+[
+  {
+    _id: ObjectId('6af848e218fad712c6a303cc'),
+    nom: 'Ben Ali',
+    prenom: 'Sami',
+    age: 21,
+    filiere: 'Reseaux',
+    niveau: 'L3'
+  },
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e1'),
+    nom: 'Trabelsi',
+    prenom: 'Amira',
+    age: 20,
+    filiere: 'Reseaux',
+    niveau: 'L3',
+    moyenne: 14.5
+  },
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e2'),
+    nom: 'Gharbi',
+    prenom: 'Yassine',
+    age: 22,
+    filiere: 'Informatique',
+    niveau: 'L3',
+    moyenne: 12
+  },
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e3'),
+    nom: 'Mansour',
+    prenom: 'Lina',
+    age: 21,
+    filiere: 'Reseaux',
+    niveau: 'L2',
+    moyenne: 16
+  },
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e4'),
+    nom: 'Jlassi',
+    prenom: 'Omar',
+    age: 23,
+    filiere: 'Informatique',
+    niveau: 'L3',
+    moyenne: 9.5
+  }
+]
+
+etudiant> db.etudiants.findOne()
+{
+  _id: ObjectId('6af848e218fad712c6a303cc'),
+  nom: 'Ben Ali',
+  prenom: 'Sami',
+  age: 21,
+  filiere: 'Reseaux',
+  niveau: 'L3'
+}
+
+etudiant> db.etudiants.findOne({ nom: "Gharbi" })
+{
+  _id: ObjectId('6af848e3b4bafa42a73331e2'),
+  nom: 'Gharbi',
+  prenom: 'Yassine',
+  age: 22,
+  filiere: 'Informatique',
+  niveau: 'L3',
+  moyenne: 12
+}
+
+etudiant> db.etudiants.find({ filiere: "Reseaux" })
+[
+  {
+    _id: ObjectId('6af848e218fad712c6a303cc'),
+    nom: 'Ben Ali',
+    prenom: 'Sami',
+    age: 21,
+    filiere: 'Reseaux',
+    niveau: 'L3'
+  },
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e1'),
+    nom: 'Trabelsi',
+    prenom: 'Amira',
+    age: 20,
+    filiere: 'Reseaux',
+    niveau: 'L3',
+    moyenne: 14.5
+  },
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e3'),
+    nom: 'Mansour',
+    prenom: 'Lina',
+    age: 21,
+    filiere: 'Reseaux',
+    niveau: 'L2',
+    moyenne: 16
+  }
+]
+
+etudiant> db.etudiants.find({ filiere: "Reseaux", niveau: "L3" })
+[
+  {
+    _id: ObjectId('6af848e218fad712c6a303cc'),
+    nom: 'Ben Ali',
+    prenom: 'Sami',
+    age: 21,
+    filiere: 'Reseaux',
+    niveau: 'L3'
+  },
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e1'),
+    nom: 'Trabelsi',
+    prenom: 'Amira',
+    age: 20,
+    filiere: 'Reseaux',
+    niveau: 'L3',
+    moyenne: 14.5
+  }
+]
+
+etudiant> db.etudiants.find({ age: { $gt: 21 } })
+[
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e2'),
+    nom: 'Gharbi',
+    prenom: 'Yassine',
+    age: 22,
+    filiere: 'Informatique',
+    niveau: 'L3',
+    moyenne: 12
+  },
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e4'),
+    nom: 'Jlassi',
+    prenom: 'Omar',
+    age: 23,
+    filiere: 'Informatique',
+    niveau: 'L3',
+    moyenne: 9.5
+  }
+]
+
+etudiant> db.etudiants.find({ moyenne: { $gte: 12, $lte: 15 } })
+[
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e1'),
+    nom: 'Trabelsi',
+    prenom: 'Amira',
+    age: 20,
+    filiere: 'Reseaux',
+    niveau: 'L3',
+    moyenne: 14.5
+  },
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e2'),
+    nom: 'Gharbi',
+    prenom: 'Yassine',
+    age: 22,
+    filiere: 'Informatique',
+    niveau: 'L3',
+    moyenne: 12
+  }
+]
+
+etudiant> db.etudiants.find({ $or: [ { niveau: "L2" }, { age: 23 } ] })
+[
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e3'),
+    nom: 'Mansour',
+    prenom: 'Lina',
+    age: 21,
+    filiere: 'Reseaux',
+    niveau: 'L2',
+    moyenne: 16
+  },
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e4'),
+    nom: 'Jlassi',
+    prenom: 'Omar',
+    age: 23,
+    filiere: 'Informatique',
+    niveau: 'L3',
+    moyenne: 9.5
+  }
+]
+
+etudiant> db.etudiants.find({}, { nom: 1, prenom: 1, _id: 0 })
+[
+  { nom: 'Ben Ali', prenom: 'Sami' },
+  { nom: 'Trabelsi', prenom: 'Amira' },
+  { nom: 'Gharbi', prenom: 'Yassine' },
+  { nom: 'Mansour', prenom: 'Lina' },
+  { nom: 'Jlassi', prenom: 'Omar' }
+]
+
+etudiant> db.etudiants.find({}, { nom: 1, age: 1, _id: 0 }).sort({ age: 1 })
+[
+  { nom: 'Trabelsi', age: 20 },
+  { nom: 'Ben Ali', age: 21 },
+  { nom: 'Mansour', age: 21 },
+  { nom: 'Gharbi', age: 22 },
+  { nom: 'Jlassi', age: 23 }
+]
+
+etudiant> db.etudiants.find({}, { nom: 1, moyenne: 1, _id: 0 }).sort({ moyenne: -1 })
+[
+  { nom: 'Mansour', moyenne: 16 },
+  { nom: 'Trabelsi', moyenne: 14.5 },
+  { nom: 'Gharbi', moyenne: 12 },
+  { nom: 'Jlassi', moyenne: 9.5 },
+  { nom: 'Ben Ali' }
+]
+
+etudiant> db.etudiants.find().limit(2)
+[
+  {
+    _id: ObjectId('6af848e218fad712c6a303cc'),
+    nom: 'Ben Ali',
+    prenom: 'Sami',
+    age: 21,
+    filiere: 'Reseaux',
+    niveau: 'L3'
+  },
+  {
+    _id: ObjectId('6af848e3b4bafa42a73331e1'),
+    nom: 'Trabelsi',
+    prenom: 'Amira',
+    age: 20,
+    filiere: 'Reseaux',
+    niveau: 'L3',
+    moyenne: 14.5
+  }
+]
+
+etudiant> db.etudiants.updateOne({ nom: "Ben Ali" }, { $set: { moyenne: 13.5 } })
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+
+etudiant> db.etudiants.updateMany({ filiere: "Reseaux" }, { $set: { campus: "Tunis" } })
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 3,
+  modifiedCount: 3,
+  upsertedCount: 0
+}
+
+etudiant> db.etudiants.updateOne({ nom: "Jlassi" }, { $inc: { age: 1 } })
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+
+etudiant> db.etudiants.find({}, { _id: 0 })
+[
+  {
+    nom: 'Ben Ali',
+    prenom: 'Sami',
+    age: 21,
+    filiere: 'Reseaux',
+    niveau: 'L3',
+    moyenne: 13.5,
+    campus: 'Tunis'
+  },
+  {
+    nom: 'Trabelsi',
+    prenom: 'Amira',
+    age: 20,
+    filiere: 'Reseaux',
+    niveau: 'L3',
+    moyenne: 14.5,
+    campus: 'Tunis'
+  },
+  {
+    nom: 'Gharbi',
+    prenom: 'Yassine',
+    age: 22,
+    filiere: 'Informatique',
+    niveau: 'L3',
+    moyenne: 12
+  },
+  {
+    nom: 'Mansour',
+    prenom: 'Lina',
+    age: 21,
+    filiere: 'Reseaux',
+    niveau: 'L2',
+    moyenne: 16,
+    campus: 'Tunis'
+  },
+  {
+    nom: 'Jlassi',
+    prenom: 'Omar',
+    age: 24,
+    filiere: 'Informatique',
+    niveau: 'L3',
+    moyenne: 9.5
+  }
+]
+
+etudiant> db.etudiants.deleteOne({ nom: "Jlassi" })
+{ acknowledged: true, deletedCount: 1 }
+
+etudiant> db.etudiants.deleteMany({ niveau: "L2" })
+{ acknowledged: true, deletedCount: 1 }
+
+etudiant> db.etudiants.insertMany([ { nom: "Belghith", prenom: "Youssef", age: 21, filiere: "Reseaux", niveau: "L3", moyenne: 15.5 }, { nom: "Hammami", prenom: "Nour", age: 20, filiere: "Informatique", niveau: "L3", moyenne: 13 }, { nom: "Saidi", prenom: "Karim", age: 22, filiere: "Reseaux", niveau: "L2", moyenne: 10.75 } ])
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('6af848f8806aca18b7e362b3'),
+    '1': ObjectId('6af848f8806aca18b7e362b4'),
+    '2': ObjectId('6af848f8806aca18b7e362b5')
+  }
+}
+
+etudiant> db.etudiants.find({ filiere: "Reseaux" }, { _id: 0 })
+[
+  {
+    nom: 'Ben Ali',
+    prenom: 'Sami',
+    age: 21,
+    filiere: 'Reseaux',
+    niveau: 'L3',
+    moyenne: 13.5,
+    campus: 'Tunis'
+  },
+  {
+    nom: 'Trabelsi',
+    prenom: 'Amira',
+    age: 20,
+    filiere: 'Reseaux',
+    niveau: 'L3',
+    moyenne: 14.5,
+    campus: 'Tunis'
+  },
+  {
+    nom: 'Belghith',
+    prenom: 'Youssef',
+    age: 21,
+    filiere: 'Reseaux',
+    niveau: 'L3',
+    moyenne: 15.5
+  },
+  {
+    nom: 'Saidi',
+    prenom: 'Karim',
+    age: 22,
+    filiere: 'Reseaux',
+    niveau: 'L2',
+    moyenne: 10.75
+  }
+]
+
+etudiant> db.etudiants.find({ moyenne: { $gte: 12 } }, { nom: 1, moyenne: 1, _id: 0 }).sort({ moyenne: -1 })
+[
+  { nom: 'Belghith', moyenne: 15.5 },
+  { nom: 'Trabelsi', moyenne: 14.5 },
+  { nom: 'Ben Ali', moyenne: 13.5 },
+  { nom: 'Hammami', moyenne: 13 },
+  { nom: 'Gharbi', moyenne: 12 }
+]
+
+etudiant> db.etudiants.updateOne({ nom: "Saidi" }, { $set: { moyenne: 12.25 } })
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+
+etudiant> db.etudiants.findOne({ nom: "Saidi" }, { nom: 1, moyenne: 1, _id: 0 })
+{ nom: 'Saidi', moyenne: 12.25 }
+
+etudiant> db.etudiants.deleteOne({ nom: "Hammami" })
+{ acknowledged: true, deletedCount: 1 }
+
+etudiant> db.etudiants.countDocuments()
+5
+
+etudiant> db.etudiants.drop()
+true
+
+etudiant> db.dropDatabase()
+{ ok: 1, dropped: 'etudiant' }
+

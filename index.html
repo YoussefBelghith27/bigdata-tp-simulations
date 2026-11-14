@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Big Data Avancée – Simulations des TP MongoDB</title>
+<meta name="description" content="Les TP du module Big Data Avancée (MongoDB 7.0, mongosh, NoSQL) à rejouer dans le navigateur, avec leurs comptes rendus et les projets ActivePresenter.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  header.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; color: var(--muted); font-size: .92rem; }
+  header.top strong { color: var(--ink); }
+
+  .hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 40px; align-items: center; padding: 28px 0 40px; }
+  .hero h1 { font-size: clamp(2.1rem, 4.1vw, 3.5rem); line-height: 1.02; margin: 0 0 22px; letter-spacing: -.01em;
+    font-variation-settings: "wdth" 122; font-weight: 800; max-width: 14ch; }
+  .hero p { font-size: 1.08rem; color: var(--muted); max-width: 46ch; margin: 0 0 22px; }
+  .hero .meta { font-size: .95rem; color: var(--ink); }
+  .stack-box { background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius-m); padding: 6px; }
+  .stack-box svg { display: block; width: 100%; height: auto; }
+  .stack-box .cap { display: block; padding: 4px 10px 6px; font-size: .82rem; color: var(--muted); }
+  svg .lbl { font: 600 13px var(--font); fill: var(--ink); }
+  svg .sub { font: 400 11.5px var(--font); fill: var(--muted); }
+  svg .mono { font: 600 12px var(--mono); fill: #e8e8e8; }
+  svg .flow { fill: none; stroke: var(--serial); stroke-width: 2.4; stroke-dasharray: 6 6; animation: dash 1.2s linear infinite; }
+  @keyframes dash { to { stroke-dashoffset: -12; } }
+  svg .pop { opacity: 0; animation: pop .45s ease-out forwards; }
+  @keyframes pop { to { opacity: 1; } }
+
+  .group { padding: 34px 0 6px; border-top: 1.5px solid var(--line); }
+  .group h2 { font-size: 1.05rem; font-weight: 700; margin: 0 0 4px; font-variation-settings: "wdth" 112; }
+  .group .gdesc { color: var(--muted); font-size: .95rem; margin: 0 0 14px; }
+  .tp { display: grid; grid-template-columns: 132px minmax(0, 1fr) auto; gap: 26px; align-items: start; padding: 22px 0; border-top: 1px dashed var(--line); }
+  .group .tp:first-of-type { border-top: 0; }
+  .tp.soon { opacity: .62; }
+  .tp .num { font-size: 1.5rem; font-weight: 800; line-height: 1.05; font-variation-settings: "wdth" 125; color: var(--router); }
+  .tp .num small { display: block; font-size: .78rem; font-weight: 500; color: var(--muted); margin-top: 6px; font-variation-settings: "wdth" 100; }
+  .tp h3 { margin: 0 0 6px; font-size: 1.32rem; line-height: 1.2; font-variation-settings: "wdth" 108; }
+  .tp p { margin: 0 0 10px; color: var(--muted); max-width: 70ch; }
+  .tp .cmds { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .tp .cmds code { background: var(--console); color: #e8e8e8; padding: .28em .6em; border-radius: 4px; font-size: .8rem; }
+  .tp .facts { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: .86rem; color: var(--muted); }
+  .tp .actions { display: flex; flex-direction: column; gap: 8px; min-width: 210px; }
+
+  .howto { padding: 42px 0 18px; border-top: 1.5px solid var(--line); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 40px; }
+  .howto h2 { margin: 0; font-size: 1.6rem; line-height: 1.1; font-variation-settings: "wdth" 115; }
+  .howto ol { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 14px; }
+  .howto li { counter-increment: s; display: grid; grid-template-columns: 40px 1fr; gap: 12px; }
+  .howto li::before { content: counter(s); width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--serial); color: var(--router); font-weight: 700; display: grid; place-items: center; }
+  .note { margin: 26px 0 0; padding: 14px 18px; border-left: 3px solid var(--router); background: var(--surface); color: var(--muted); font-size: .92rem; border-radius: 0 var(--radius-s) var(--radius-s) 0; }
+  footer { padding: 34px 0 50px; color: var(--muted); font-size: .88rem; }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; gap: 26px; }
+    .howto { grid-template-columns: 1fr; gap: 18px; }
+    .tp { grid-template-columns: 1fr; gap: 10px; }
+    .tp .actions { flex-direction: row; flex-wrap: wrap; min-width: 0; }
+  }
+  @media (max-width: 520px) {
+    .wrap { padding: 0 16px; }
+    header.top { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .tp .actions .btn { flex: 1 1 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span><strong>Big Data Avancée</strong> – NoSQL et MongoDB, RSI3, ISET Nabeul</span>
+    <span>Youssef Belghith, RSI31, 2026–2027</span>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1>Les TP MongoDB, à rejouer étape par étape</h1>
+      <p>Chaque simulation reprend la manipulation complète : les clics dans les installateurs et les fenêtres Windows, puis les commandes tapées dans cmd et dans mongosh, avec un sous-titre qui explique chaque étape. Chaque TP a aussi son compte rendu en PDF et son projet ActivePresenter.</p>
+      <p class="meta" id="totals"></p>
+      <a class="btn btn-primary" href="#tps">Voir les TP</a>
+    </div>
+    <div class="stack-box">
+      <svg viewBox="0 0 720 400" role="img" aria-label="Chaîne du TP1 : cmd lance mongosh, qui se connecte au service mongod sur 127.0.0.1:27017, qui stocke la base etudiant">
+        <g class="pop" style="animation-delay:.1s">
+          <rect x="30" y="60" width="190" height="120" rx="8" fill="#0c0c0c"/>
+          <rect x="30" y="60" width="190" height="22" rx="8" fill="#2b2b2b"/><rect x="30" y="74" width="190" height="8" fill="#2b2b2b"/>
+          <text x="42" y="76" class="sub" style="fill:#ccc">Invite de commandes</text>
+          <text x="42" y="108" class="mono">C:\&gt; mongosh</text>
+          <text x="42" y="130" class="mono" style="fill:#16c60c">test&gt; use etudiant</text>
+          <text x="42" y="152" class="mono">etudiant&gt; _</text>
+          <text x="30" y="204" class="lbl">mongosh</text><text x="30" y="222" class="sub">le client (shell)</text>
+        </g>
+        <path class="flow" d="M230 120 H350"/>
+        <g class="pop" style="animation-delay:.5s">
+          <text x="252" y="108" class="sub">TCP 127.0.0.1:27017</text>
+          <rect x="360" y="70" width="150" height="100" rx="10" fill="#0b7a53"/>
+          <text x="435" y="112" text-anchor="middle" class="lbl" style="fill:#fff">mongod</text>
+          <text x="435" y="132" text-anchor="middle" class="sub" style="fill:#d6f5e4">service Windows</text>
+          <text x="435" y="150" text-anchor="middle" class="sub" style="fill:#d6f5e4">« MongoDB »</text>
+          <text x="360" y="204" class="lbl">le serveur</text><text x="360" y="222" class="sub">écoute en local uniquement</text>
+        </g>
+        <path class="flow" d="M520 120 H590"/>
+        <g class="pop" style="animation-delay:.9s">
+          <ellipse cx="640" cy="78" rx="44" ry="13" fill="#4fbf86"/>
+          <path d="M596 78 v84 c0 7 20 13 44 13 s44-6 44-13 v-84 c0 7-20 13-44 13 s-44-6-44-13z" fill="#13aa52"/>
+          <path d="M596 106c0 7 20 13 44 13s44-6 44-13M596 134c0 7 20 13 44 13s44-6 44-13" stroke="#0b7a53" stroke-width="2" fill="none"/>
+          <text x="596" y="204" class="lbl">base etudiant</text><text x="596" y="222" class="sub">collection etudiants</text>
+        </g>
+        <g class="pop" style="animation-delay:1.3s">
+          <rect x="30" y="258" width="660" height="110" rx="8" fill="#f6faf8" stroke="#c6d4cd"/>
+          <text x="48" y="286" class="sub">un document JSON / BSON</text>
+          <text x="48" y="314" style="font:600 13px var(--mono);fill:#0f2a2e">{ nom: <tspan fill="#0b7a53">"Ben Ali"</tspan>, prenom: <tspan fill="#0b7a53">"Sami"</tspan>, age: <tspan fill="#b07d00">21</tspan>, filiere: <tspan fill="#0b7a53">"Reseaux"</tspan>, niveau: <tspan fill="#0b7a53">"L3"</tspan> }</text>
+          <text x="48" y="346" class="sub">base ≈ schéma SQL · collection ≈ table · document ≈ ligne · champ ≈ colonne</text>
+        </g>
+      </svg>
+      <span class="stack-box cap" style="border:0;padding:4px 10px 6px">Ce que met en place le TP1 : le client, le serveur et la première base.</span>
+    </div>
+  </section>
+
+  <main id="tps"></main>
+
+  <section class="howto">
+    <h2>Utiliser une simulation</h2>
+    <div>
+      <ol>
+        <li><span>Ouvrez un TP avec <b>Lancer la simulation</b>. Le sous-titre en haut de l'écran explique chaque étape.</span></li>
+        <li><span>Quand une zone est <b>entourée en orange</b>, cliquez dessus (bouton Next, case à cocher, ligne Path…).</span></li>
+        <li><span>Quand le <b>cadre vert</b> apparaît sur l'invite de cmd ou de mongosh, ou dans un champ de saisie, tapez le texte demandé puis appuyez sur <b>Entrée</b>. Les variantes d'espacement courantes sont acceptées.</span></li>
+        <li><span>Le mode <b>Démo</b> fait tout à votre place. À la fin, le score indique les actions réussies du premier coup.</span></li>
+      </ol>
+      <p class="note">Les sorties de mongosh (bases, insertions, find, updates, deletes) viennent d'une vraie exécution de MongoDB 7.0 et mongosh 2.x. Les écrans Windows (installateurs, Path, cmd, service, netstat) sont reconstitués d'après l'énoncé : ce sont des résultats attendus, signalés comme tels dans chaque simulation et chaque compte rendu. Les projets ActivePresenter (.approj) sont disponibles pour être modifiés.</p>
+    </div>
+  </section>
+
+  <footer>Youssef Belghith – Big Data Avancée, ISET Nabeul, année universitaire 2026–2027.</footer>
+</div>
+
+<script src="assets/catalog.js"></script>
+<script src="assets/home.js"></script>
+</body>
+</html>

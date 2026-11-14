@@ -1,0 +1,57 @@
+/* Big Data Avancée — palette « documents » : vert feuille, encre bleu nuit, console noire */
+:root {
+  --paper: #eef3f0;
+  --paper-2: #e1e9e4;
+  --surface: #ffffff;
+  --ink: #0f2a2e;
+  --muted: #52676a;
+  --line: #c6d4cd;
+  --router: #0b7a53;        /* couleur principale (boutons, numéros) */
+  --router-dark: #075c3e;
+  --serial: #13aa52;        /* barre de progression, accents */
+  --port: #2db24a;          /* cadre vert de saisie */
+  --hint: #fff3b0;
+  --console: #0c0c0c;
+  --radius-s: 6px;
+  --radius-m: 12px;
+  --font: "Archivo", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--font); font-size: 16px; line-height: 1.55;
+  font-variation-settings: "wdth" 100;
+}
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--router); outline-offset: 2px; border-radius: 4px; }
+code, .cmd { font-family: var(--mono); font-size: .86em; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: .45em; justify-content: center;
+  font: 600 .92rem/1 var(--font); text-decoration: none; cursor: pointer;
+  padding: .7em 1.05em; border-radius: var(--radius-s); border: 1.5px solid var(--ink);
+  background: transparent; color: var(--ink); transition: background .15s, color .15s, transform .1s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--ink); color: var(--paper); }
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--router); border-color: var(--router); color: #fff; }
+.btn-primary:hover { background: var(--router-dark); border-color: var(--router-dark); color: #fff; }
+.btn-quiet { border-color: var(--line); color: var(--muted); }
+.btn-quiet:hover { background: var(--paper-2); color: var(--ink); }
+.btn[aria-disabled="true"] { opacity: .45; pointer-events: none; }
+.btn svg { width: 1.05em; height: 1.05em; flex: none; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: .4em; font-size: .78rem; font-weight: 600;
+  padding: .22em .6em; border-radius: 999px; background: var(--paper-2); color: var(--muted);
+}
+.badge::before { content: ""; width: .5em; height: .5em; border-radius: 50%; background: currentColor; }
+.badge.real { background: #dcf3e2; color: #1d7a34; }
+.badge.soon { background: #fff1c7; color: #8a6400; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition: none !important; }
+}
