@@ -10,5 +10,11 @@
   "commands": 38,
   "clicks": 0,
   "size_kb": 2326
+ },
+ "tp3-replication-sharding": {
+  "slides": 73,
+  "commands": 56,
+  "clicks": 0,
+  "size_kb": 4811
  }
 }

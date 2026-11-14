@@ -60,15 +60,22 @@ window.CATALOG = {
    "id": "tp3-replication-sharding",
    "group": "dist",
    "num": "TP3",
-   "title": "Réplication et sharding",
-   "desc": "Replica set à 5 nœuds avec arbitre et bascule du primaire, puis cluster shardé : 3 serveurs de configuration, 3 shards et un routeur mongos.",
+   "title": "Haute disponibilité et sharding",
+   "desc": "Replica Set rs0 (1 Primary, 3 Secondary, 1 Arbiter) : réplication, oplog, panne du Primary et élection. Puis cluster shardé : configRS, trois shards en Replica Set, mongos, shard key matricule, chunks, routage ciblé ou diffusé (explain) et panne d'un shard à deux membres.",
    "cmds": [
-    "rs.initiate()",
+    "mongod --dbpath C:\\mongodb\\tp3\\data\\node1 --port 27017 --replSet rs0",
     "rs.status()",
-    "sh.shardCollection()"
+    "sh.shardCollection('universite.etudiants',{matricule:1})",
+    "db.etudiants.getShardDistribution()"
    ],
-   "tool": "mongod · mongos",
-   "soon": true
+   "cr": "cr/CR_TP3_Replication_Sharding.pdf",
+   "approj": "activepresenter/TP3_Replication_Sharding_Simulation.approj",
+   "tool": "mongod · mongos · mongosh",
+   "origin": "Sorties mongosh réelles, fenêtres mongod reconstituées",
+   "real": false,
+   "slides": 73,
+   "commands": 56,
+   "clicks": 0
   }
  ]
 };

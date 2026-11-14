@@ -1,0 +1,1955 @@
+===== s_p1_init.txt
+#### P1_init
+[direct: other] test> rs.initiate({
+  _id: "rs0",
+  members: [
+    { _id: 0, host: "localhost:27017" },
+    { _id: 1, host: "localhost:27018" },
+    { _id: 2, host: "localhost:27019" },
+    { _id: 3, host: "localhost:27020" },
+    { _id: 4, host: "localhost:27021", arbiterOnly: true }
+  ]
+})
+{
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213079, i: 1 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213079, i: 1 })
+}
+rs0 [direct: secondary] test>
+#### P1_status
+rs0 [direct: primary] test> rs.status().members.forEach(m => print(m.name + " -> " + m.stateStr))
+localhost:27017 -> PRIMARY
+localhost:27018 -> SECONDARY
+localhost:27019 -> SECONDARY
+localhost:27020 -> SECONDARY
+localhost:27021 -> ARBITER
+rs0 [direct: primary] test>
+===== s_p1_rsstatus.txt
+rs0 [direct: primary] test> rs.status()
+{
+  set: 'rs0',
+  date: ISODate('2026-11-09T08:31:31.576Z'),
+  myState: 1,
+  term: Long('1'),
+  members: [
+    {
+      _id: 0,
+      name: 'localhost:27017',
+      health: 1,
+      state: 1,
+      stateStr: 'PRIMARY',
+      uptime: 19,
+      optime: { ts: Timestamp({ t: 1794213090, i: 22 }), t: Long('1') }
+    },
+    {
+      _id: 1,
+      name: 'localhost:27018',
+      health: 1,
+      state: 2,
+      stateStr: 'SECONDARY',
+      uptime: 12,
+      optime: { ts: Timestamp({ t: 1794213079, i: 1 }), t: Long('-1') }
+    }
+  ]
+}
+===== s_p1_tests.txt
+#### P1_hello
+rs0 [direct: primary] test> db.hello()
+{
+  topologyVersion: {
+    processId: ObjectId('6af184d0be588fddced24313'),
+    counter: Long('6')
+  },
+  hosts: [
+    'localhost:27017',
+    'localhost:27018',
+    'localhost:27019',
+    'localhost:27020'
+  ],
+  arbiters: [ 'localhost:27021' ],
+  setName: 'rs0',
+  setVersion: 1,
+  isWritablePrimary: true,
+  secondary: false,
+  primary: 'localhost:27017',
+  me: 'localhost:27017',
+  electionId: ObjectId('7fffffff0000000000000001'),
+  lastWrite: {
+    opTime: { ts: Timestamp({ t: 1794213090, i: 22 }), t: Long('1') },
+    lastWriteDate: ISODate('2026-11-09T08:31:30.000Z'),
+    majorityOpTime: { ts: Timestamp({ t: 1794213090, i: 22 }), t: Long('1') },
+    majorityWriteDate: ISODate('2026-11-09T08:31:30.000Z')
+  },
+  maxBsonObjectSize: 16777216,
+  maxMessageSizeBytes: 48000000,
+  maxWriteBatchSize: 100000,
+  localTime: ISODate('2026-11-09T08:31:32.575Z'),
+  logicalSessionTimeoutMinutes: 30,
+  connectionId: 49,
+  minWireVersion: 0,
+  maxWireVersion: 21,
+  readOnly: false,
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213090, i: 22 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213090, i: 22 })
+}
+rs0 [direct: primary] test>
+#### P1_writable
+rs0 [direct: primary] test> db.hello().isWritablePrimary
+true
+rs0 [direct: primary] test>
+#### P1_use
+rs0 [direct: primary] test> use universite
+switched to db universite
+rs0 [direct: primary] universite>
+#### P1_insert
+rs0 [direct: primary] universite> db.etudiants.insertMany([
+  {matricule:"L3-001",nom:"Ali",age:21,filiere:"BigData"},
+  {matricule:"L3-002",nom:"Sarra",age:22,filiere:"BigData"},
+  {matricule:"L3-003",nom:"Ahmed",age:21,filiere:"IA"},
+  {matricule:"L3-004",nom:"Meriem",age:23,filiere:"DevWeb"}
+])
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('6af184e48a29f2a3baea1878'),
+    '1': ObjectId('6af184e48a29f2a3baea1879'),
+    '2': ObjectId('6af184e48a29f2a3baea187a'),
+    '3': ObjectId('6af184e48a29f2a3baea187b')
+  }
+}
+rs0 [direct: primary] universite>
+#### P1_count
+rs0 [direct: primary] universite> db.etudiants.countDocuments()
+4
+rs0 [direct: primary] universite>
+#### P1_uselocal
+rs0 [direct: primary] universite> use local
+switched to db local
+rs0 [direct: primary] local>
+#### P1_showcoll
+rs0 [direct: primary] local> show collections
+replset.oplogTruncateAfterPoint
+oplog.rs
+replset.election
+system.rollback.id
+system.replset
+system.views
+replset.initialSyncId
+replset.minvalid
+startup_log
+system.tenantMigration.oplogView
+rs0 [direct: primary] local>
+#### P1_oplog
+rs0 [direct: primary] local> db.oplog.rs.find().sort({$natural:-1}).limit(5)
+[
+  {
+    lsid: {
+      id: UUID('d8f592c9-3b94-4237-a0e4-c85856f2baad'),
+      uid: Binary.createFromBase64('47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=', 0)
+    },
+    txnNumber: Long('1'),
+    op: 'i',
+    ns: 'universite.etudiants',
+    ui: UUID('cc808398-c4c8-496a-9263-398d36b9ffae'),
+    o: {
+      _id: ObjectId('6af184e48a29f2a3baea187b'),
+      matricule: 'L3-004',
+      nom: 'Meriem',
+      age: 23,
+      filiere: 'DevWeb'
+    },
+    o2: { _id: ObjectId('6af184e48a29f2a3baea187b') },
+    stmtId: 3,
+    ts: Timestamp({ t: 1794213092, i: 5 }),
+    t: Long('1'),
+    v: Long('2'),
+    wall: ISODate('2026-11-09T08:31:32.602Z'),
+    prevOpTime: { ts: Timestamp({ t: 1794213092, i: 4 }), t: Long('1') }
+  },
+  {
+    lsid: {
+      id: UUID('d8f592c9-3b94-4237-a0e4-c85856f2baad'),
+      uid: Binary.createFromBase64('47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=', 0)
+    },
+    txnNumber: Long('1'),
+    op: 'i',
+    ns: 'universite.etudiants',
+    ui: UUID('cc808398-c4c8-496a-9263-398d36b9ffae'),
+    o: {
+      _id: ObjectId('6af184e48a29f2a3baea187a'),
+      matricule: 'L3-003',
+      nom: 'Ahmed',
+      age: 21,
+      filiere: 'IA'
+    },
+    o2: { _id: ObjectId('6af184e48a29f2a3baea187a') },
+    stmtId: 2,
+    ts: Timestamp({ t: 1794213092, i: 4 }),
+    t: Long('1'),
+    v: Long('2'),
+    wall: ISODate('2026-11-09T08:31:32.602Z'),
+    prevOpTime: { ts: Timestamp({ t: 1794213092, i: 3 }), t: Long('1') }
+  },
+  {
+    lsid: {
+      id: UUID('d8f592c9-3b94-4237-a0e4-c85856f2baad'),
+      uid: Binary.createFromBase64('47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=', 0)
+    },
+    txnNumber: Long('1'),
+    op: 'i',
+    ns: 'universite.etudiants',
+    ui: UUID('cc808398-c4c8-496a-9263-398d36b9ffae'),
+    o: {
+      _id: ObjectId('6af184e48a29f2a3baea1879'),
+      matricule: 'L3-002',
+      nom: 'Sarra',
+      age: 22,
+      filiere: 'BigData'
+    },
+    o2: { _id: ObjectId('6af184e48a29f2a3baea1879') },
+    stmtId: 1,
+    ts: Timestamp({ t: 1794213092, i: 3 }),
+    t: Long('1'),
+    v: Long('2'),
+    wall: ISODate('2026-11-09T08:31:32.602Z'),
+    prevOpTime: { ts: Timestamp({ t: 1794213092, i: 2 }), t: Long('1') }
+  },
+  {
+    lsid: {
+      id: UUID('d8f592c9-3b94-4237-a0e4-c85856f2baad'),
+      uid: Binary.createFromBase64('47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=', 0)
+    },
+    txnNumber: Long('1'),
+    op: 'i',
+    ns: 'universite.etudiants',
+    ui: UUID('cc808398-c4c8-496a-9263-398d36b9ffae'),
+    o: {
+      _id: ObjectId('6af184e48a29f2a3baea1878'),
+      matricule: 'L3-001',
+      nom: 'Ali',
+      age: 21,
+      filiere: 'BigData'
+    },
+    o2: { _id: ObjectId('6af184e48a29f2a3baea1878') },
+    stmtId: 0,
+    ts: Timestamp({ t: 1794213092, i: 2 }),
+    t: Long('1'),
+    v: Long('2'),
+    wall: ISODate('2026-11-09T08:31:32.602Z'),
+    prevOpTime: { ts: Timestamp({ t: 0, i: 0 }), t: Long('-1') }
+  },
+  {
+    op: 'c',
+    ns: 'universite.$cmd',
+    ui: UUID('cc808398-c4c8-496a-9263-398d36b9ffae'),
+    o: {
+      create: 'etudiants',
+      idIndex: { v: 2, key: { _id: 1 }, name: '_id_' }
+    },
+    ts: Timestamp({ t: 1794213092, i: 1 }),
+    t: Long('1'),
+    v: Long('2'),
+    wall: ISODate('2026-11-09T08:31:32.602Z')
+  }
+]
+rs0 [direct: primary] local>
+#### P1_oplog_ns
+rs0 [direct: primary] local> db.oplog.rs.find({ns:"universite.etudiants"}).sort({$natural:-1}).limit(4)
+[
+  {
+    lsid: {
+      id: UUID('d8f592c9-3b94-4237-a0e4-c85856f2baad'),
+      uid: Binary.createFromBase64('47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=', 0)
+    },
+    txnNumber: Long('1'),
+    op: 'i',
+    ns: 'universite.etudiants',
+    ui: UUID('cc808398-c4c8-496a-9263-398d36b9ffae'),
+    o: {
+      _id: ObjectId('6af184e48a29f2a3baea187b'),
+      matricule: 'L3-004',
+      nom: 'Meriem',
+      age: 23,
+      filiere: 'DevWeb'
+    },
+    o2: { _id: ObjectId('6af184e48a29f2a3baea187b') },
+    stmtId: 3,
+    ts: Timestamp({ t: 1794213092, i: 5 }),
+    t: Long('1'),
+    v: Long('2'),
+    wall: ISODate('2026-11-09T08:31:32.602Z'),
+    prevOpTime: { ts: Timestamp({ t: 1794213092, i: 4 }), t: Long('1') }
+  },
+  {
+    lsid: {
+      id: UUID('d8f592c9-3b94-4237-a0e4-c85856f2baad'),
+      uid: Binary.createFromBase64('47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=', 0)
+    },
+    txnNumber: Long('1'),
+    op: 'i',
+    ns: 'universite.etudiants',
+    ui: UUID('cc808398-c4c8-496a-9263-398d36b9ffae'),
+    o: {
+      _id: ObjectId('6af184e48a29f2a3baea187a'),
+      matricule: 'L3-003',
+      nom: 'Ahmed',
+      age: 21,
+      filiere: 'IA'
+    },
+    o2: { _id: ObjectId('6af184e48a29f2a3baea187a') },
+    stmtId: 2,
+    ts: Timestamp({ t: 1794213092, i: 4 }),
+    t: Long('1'),
+    v: Long('2'),
+    wall: ISODate('2026-11-09T08:31:32.602Z'),
+    prevOpTime: { ts: Timestamp({ t: 1794213092, i: 3 }), t: Long('1') }
+  },
+  {
+    lsid: {
+      id: UUID('d8f592c9-3b94-4237-a0e4-c85856f2baad'),
+      uid: Binary.createFromBase64('47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=', 0)
+    },
+    txnNumber: Long('1'),
+    op: 'i',
+    ns: 'universite.etudiants',
+    ui: UUID('cc808398-c4c8-496a-9263-398d36b9ffae'),
+    o: {
+      _id: ObjectId('6af184e48a29f2a3baea1879'),
+      matricule: 'L3-002',
+      nom: 'Sarra',
+      age: 22,
+      filiere: 'BigData'
+    },
+    o2: { _id: ObjectId('6af184e48a29f2a3baea1879') },
+    stmtId: 1,
+    ts: Timestamp({ t: 1794213092, i: 3 }),
+    t: Long('1'),
+    v: Long('2'),
+    wall: ISODate('2026-11-09T08:31:32.602Z'),
+    prevOpTime: { ts: Timestamp({ t: 1794213092, i: 2 }), t: Long('1') }
+  },
+  {
+    lsid: {
+      id: UUID('d8f592c9-3b94-4237-a0e4-c85856f2baad'),
+      uid: Binary.createFromBase64('47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=', 0)
+    },
+    txnNumber: Long('1'),
+    op: 'i',
+    ns: 'universite.etudiants',
+    ui: UUID('cc808398-c4c8-496a-9263-398d36b9ffae'),
+    o: {
+      _id: ObjectId('6af184e48a29f2a3baea1878'),
+      matricule: 'L3-001',
+      nom: 'Ali',
+      age: 21,
+      filiere: 'BigData'
+    },
+    o2: { _id: ObjectId('6af184e48a29f2a3baea1878') },
+    stmtId: 0,
+    ts: Timestamp({ t: 1794213092, i: 2 }),
+    t: Long('1'),
+    v: Long('2'),
+    wall: ISODate('2026-11-09T08:31:32.602Z'),
+    prevOpTime: { ts: Timestamp({ t: 0, i: 0 }), t: Long('-1') }
+  }
+]
+rs0 [direct: primary] local>
+===== s_p1_secondary.txt
+#### P1_sec_ok
+rs0 [direct: secondary] test> rs.secondaryOk()
+DeprecationWarning: .setSecondaryOk() is deprecated. Use .setReadPref("primaryPreferred") instead
+Setting read preference from "primary" to "primaryPreferred"
+rs0 [direct: secondary] test>
+#### P1_sec_hello
+rs0 [direct: secondary] test> db.hello().secondary
+true
+rs0 [direct: secondary] test>
+#### P1_sec_use
+rs0 [direct: secondary] test> use universite
+switched to db universite
+rs0 [direct: secondary] universite>
+#### P1_sec_find
+rs0 [direct: secondary] universite> db.etudiants.find()
+[
+  {
+    _id: ObjectId('6af184e48a29f2a3baea1879'),
+    matricule: 'L3-002',
+    nom: 'Sarra',
+    age: 22,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af184e48a29f2a3baea187b'),
+    matricule: 'L3-004',
+    nom: 'Meriem',
+    age: 23,
+    filiere: 'DevWeb'
+  },
+  {
+    _id: ObjectId('6af184e48a29f2a3baea1878'),
+    matricule: 'L3-001',
+    nom: 'Ali',
+    age: 21,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af184e48a29f2a3baea187a'),
+    matricule: 'L3-003',
+    nom: 'Ahmed',
+    age: 21,
+    filiere: 'IA'
+  }
+]
+rs0 [direct: secondary] universite>
+#### P1_sec_count
+rs0 [direct: secondary] universite> db.etudiants.countDocuments()
+4
+rs0 [direct: secondary] universite>
+===== s_p1_failover.txt
+#### P1_fo_status
+rs0 [direct: primary] test> rs.status().members.forEach(m => print(m.name + " -> " + m.stateStr))
+localhost:27017 -> (not reachable/healthy)
+localhost:27018 -> PRIMARY
+localhost:27019 -> SECONDARY
+localhost:27020 -> SECONDARY
+localhost:27021 -> ARBITER
+rs0 [direct: primary] test>
+#### P1_fo_hello
+rs0 [direct: primary] test> db.hello().primary
+localhost:27018
+rs0 [direct: primary] test>
+#### P1_fo_writable
+rs0 [direct: primary] test> db.hello().isWritablePrimary
+true
+rs0 [direct: primary] test>
+#### P1_fo_use
+rs0 [direct: primary] test> use universite
+switched to db universite
+rs0 [direct: primary] universite>
+#### P1_fo_insert
+rs0 [direct: primary] universite> db.etudiants.insertOne({
+  matricule:"L3-005", nom:"ApresFailover", age:22, filiere:"BigData"
+})
+{
+  acknowledged: true,
+  insertedId: ObjectId('6af184fddc50a6c24694f7c6')
+}
+rs0 [direct: primary] universite>
+#### P1_fo_count
+rs0 [direct: primary] universite> db.etudiants.countDocuments()
+5
+rs0 [direct: primary] universite>
+===== s_p1_retour.txt
+#### P1_retour
+rs0 [direct: primary] test> rs.status().members.forEach(m => print(m.name + " -> " + m.stateStr))
+localhost:27017 -> SECONDARY
+localhost:27018 -> PRIMARY
+localhost:27019 -> SECONDARY
+localhost:27020 -> SECONDARY
+localhost:27021 -> ARBITER
+rs0 [direct: primary] test>
+rs0 [direct: secondary] test> rs.secondaryOk()
+rs0 [direct: secondary] test> use universite
+switched to db universite
+rs0 [direct: secondary] universite> db.etudiants.find({matricule:"L3-005"})
+[
+  {
+    _id: ObjectId('6af184fddc50a6c24694f7c6'),
+    matricule: 'L3-005',
+    nom: 'ApresFailover',
+    age: 22,
+    filiere: 'BigData'
+  }
+]
+rs0 [direct: secondary] universite> db.etudiants.countDocuments()
+5
+rs0 [direct: secondary] universite>
+===== s_p2_cfg.txt
+#### P2_cfg_init
+[direct: other] test> rs.initiate({
+    _id:"configRS",
+    configsvr:true,
+    members:[
+      {_id:0,host:"localhost:28019"},
+      {_id:1,host:"localhost:28020"},
+      {_id:2,host:"localhost:28021"}
+    ]
+  })
+{ ok: 1 }
+configRS [direct: secondary] test>
+#### P2_cfg_status
+configRS [direct: secondary] test> rs.status().members.forEach(m => print(m.name + " -> " + m.stateStr))
+localhost:28019 -> PRIMARY
+localhost:28020 -> SECONDARY
+localhost:28021 -> SECONDARY
+configRS [direct: secondary] test>
+===== s_p2_s1.txt
+#### P2_s1_init
+[direct: other] test> rs.initiate({
+    _id:"shardRS1",
+    members:[
+      {_id:0,host:"localhost:28101"},
+      {_id:1,host:"localhost:28102"}
+    ]
+  })
+{ ok: 1 }
+shardRS1 [direct: secondary] test>
+#### P2_s1_status
+shardRS1 [direct: primary] test> rs.status().members.forEach(m => print(m.name + " -> " + m.stateStr))
+localhost:28101 -> PRIMARY
+localhost:28102 -> SECONDARY
+shardRS1 [direct: primary] test>
+===== s_p2_s2.txt
+#### P2_s2_init
+[direct: other] test> rs.initiate({
+    _id:"shardRS2",
+    members:[
+      {_id:0,host:"localhost:28201"},
+      {_id:1,host:"localhost:28202"}
+    ]
+  })
+{ ok: 1 }
+shardRS2 [direct: secondary] test>
+#### P2_s2_status
+shardRS2 [direct: primary] test> rs.status().members.forEach(m => print(m.name + " -> " + m.stateStr))
+localhost:28201 -> PRIMARY
+localhost:28202 -> SECONDARY
+shardRS2 [direct: primary] test>
+===== s_p2_s3.txt
+#### P2_s3_init
+[direct: other] test> rs.initiate({
+    _id:"shardRS3",
+    members:[
+      {_id:0,host:"localhost:28301"},
+      {_id:1,host:"localhost:28302"}
+    ]
+  })
+{ ok: 1 }
+shardRS3 [direct: other] test>
+#### P2_s3_status
+shardRS3 [direct: primary] test> rs.status().members.forEach(m => print(m.name + " -> " + m.stateStr))
+localhost:28301 -> PRIMARY
+localhost:28302 -> SECONDARY
+shardRS3 [direct: primary] test>
+===== s_p2_tests_run1.txt
+#### P2_add1
+[direct: mongos] test> sh.addShard('shardRS1/localhost:28101,localhost:28102')
+{
+  shardAdded: 'shardRS1',
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213229, i: 5 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213229, i: 5 })
+}
+[direct: mongos] test>
+#### P2_add2
+[direct: mongos] test> sh.addShard('shardRS2/localhost:28201,localhost:28202')
+{
+  shardAdded: 'shardRS2',
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213229, i: 18 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213229, i: 8 })
+}
+[direct: mongos] test>
+#### P2_add3
+[direct: mongos] test> sh.addShard('shardRS3/localhost:28301,localhost:28302')
+{
+  shardAdded: 'shardRS3',
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213229, i: 21 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213229, i: 21 })
+}
+[direct: mongos] test>
+#### P2_status1
+[direct: mongos] test> sh.status()
+shardingVersion
+{ _id: 1, clusterId: ObjectId('6af1853aef984d61cc1bf0e4') }
+---
+shards
+[
+  {
+    _id: 'shardRS1',
+    host: 'shardRS1/localhost:28101,localhost:28102',
+    state: 1,
+    topologyTime: Timestamp({ t: 1794213229, i: 2 })
+  },
+  {
+    _id: 'shardRS2',
+    host: 'shardRS2/localhost:28201,localhost:28202',
+    state: 1,
+    topologyTime: Timestamp({ t: 1794213229, i: 6 })
+  },
+  {
+    _id: 'shardRS3',
+    host: 'shardRS3/localhost:28301,localhost:28302',
+    state: 1,
+    topologyTime: Timestamp({ t: 1794213229, i: 19 })
+  }
+]
+---
+active mongoses
+[ { '7.0.34': 1 } ]
+---
+autosplit
+{ 'Currently enabled': 'yes' }
+---
+balancer
+{
+  'Currently enabled': 'yes',
+  'Currently running': 'no',
+  'Failed balancer rounds in last 5 attempts': 0,
+  'Migration Results for the last 24 hours': 'No recent migrations'
+}
+---
+shardedDataDistribution
+[]
+---
+databases
+[
+  {
+    database: { _id: 'config', primary: 'config', partitioned: true },
+    collections: {}
+  }
+]
+[direct: mongos] test>
+#### P2_use
+[direct: mongos] test> use universite
+switched to db universite
+[direct: mongos] universite>
+#### P2_drop
+[direct: mongos] universite> db.etudiants.drop()
+true
+[direct: mongos] universite>
+#### P2_insert
+[direct: mongos] universite> for (let i=1; i<=30000; i++) {
+  db.etudiants.insertOne({
+    matricule:i,
+    nom:'Etudiant_'+i,
+    age:18+(i%10),
+    filiere:['BigData','IA','DevWeb'][i%3]
+  })
+}
+{
+  acknowledged: true,
+  insertedId: ObjectId('6af185d84f8bc9df7ddf65ce')
+}
+[direct: mongos] universite>
+#### P2_count
+[direct: mongos] universite> db.etudiants.countDocuments()
+30000
+[direct: mongos] universite>
+#### P2_index
+[direct: mongos] universite> db.etudiants.createIndex({matricule:1})
+matricule_1
+[direct: mongos] universite>
+#### P2_shard
+[direct: mongos] universite> sh.shardCollection('universite.etudiants',{matricule:1})
+{
+  collectionsharded: 'universite.etudiants',
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213337, i: 39 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213337, i: 39 })
+}
+[direct: mongos] universite>
+#### P2_split1
+[direct: mongos] universite> sh.splitAt('universite.etudiants',{matricule:10000})
+{
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213337, i: 48 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213337, i: 48 })
+}
+[direct: mongos] universite>
+#### P2_split2
+[direct: mongos] universite> sh.splitAt('universite.etudiants',{matricule:20000})
+{
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213337, i: 57 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213337, i: 57 })
+}
+[direct: mongos] universite>
+#### P2_move1
+[direct: mongos] universite> sh.moveChunk('universite.etudiants',{matricule:5000},'shardRS1')
+{
+  millis: 11,
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213337, i: 57 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213337, i: 51 })
+}
+[direct: mongos] universite>
+#### P2_move2
+[direct: mongos] universite> sh.moveChunk('universite.etudiants',{matricule:15000},'shardRS2')
+{
+  millis: 580,
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213337, i: 10110 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213337, i: 10110 })
+}
+[direct: mongos] universite>
+#### P2_move3
+[direct: mongos] universite> sh.moveChunk('universite.etudiants',{matricule:25000},'shardRS3')
+{
+  millis: 665,
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213338, i: 10048 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213338, i: 10048 })
+}
+[direct: mongos] universite>
+#### P2_status2
+[direct: mongos] universite> sh.status()
+shardingVersion
+{ _id: 1, clusterId: ObjectId('6af1853aef984d61cc1bf0e4') }
+---
+shards
+[
+  {
+    _id: 'shardRS1',
+    host: 'shardRS1/localhost:28101,localhost:28102',
+    state: 1,
+    topologyTime: Timestamp({ t: 1794213229, i: 2 })
+  },
+  {
+    _id: 'shardRS2',
+    host: 'shardRS2/localhost:28201,localhost:28202',
+    state: 1,
+    topologyTime: Timestamp({ t: 1794213229, i: 6 })
+  },
+  {
+    _id: 'shardRS3',
+    host: 'shardRS3/localhost:28301,localhost:28302',
+    state: 1,
+    topologyTime: Timestamp({ t: 1794213229, i: 19 })
+  }
+]
+---
+active mongoses
+[ { '7.0.34': 1 } ]
+---
+autosplit
+{ 'Currently enabled': 'yes' }
+---
+balancer
+{
+  'Currently enabled': 'yes',
+  'Currently running': 'no',
+  'Failed balancer rounds in last 5 attempts': 0,
+  'Migration Results for the last 24 hours': { '2': 'Success' }
+}
+---
+shardedDataDistribution
+[
+  {
+    ns: 'universite.etudiants',
+    shards: [
+      {
+        shardName: 'shardRS2',
+        numOrphanedDocs: 0,
+        numOwnedDocuments: 10000,
+        ownedSizeBytes: 880000,
+        orphanedSizeBytes: 0
+      },
+      {
+        shardName: 'shardRS1',
+        numOrphanedDocs: 20001,
+        numOwnedDocuments: 9999,
+        ownedSizeBytes: 879912,
+        orphanedSizeBytes: 1760088
+      },
+      {
+        shardName: 'shardRS3',
+        numOrphanedDocs: 0,
+        numOwnedDocuments: 10001,
+        ownedSizeBytes: 890089,
+        orphanedSizeBytes: 0
+      }
+    ]
+  }
+]
+---
+databases
+[
+  {
+    database: { _id: 'config', primary: 'config', partitioned: true },
+    collections: {}
+  },
+  {
+    database: {
+      _id: 'universite',
+      primary: 'shardRS1',
+      partitioned: false,
+      version: {
+        uuid: UUID('d04183a6-cd5e-4e02-83b4-605accc18a63'),
+        timestamp: Timestamp({ t: 1794213229, i: 22 }),
+        lastMod: 1
+      }
+    },
+    collections: {
+      'universite.etudiants': {
+        shardKey: { matricule: 1 },
+        unique: false,
+        balancing: true,
+        chunkMetadata: [
+          { shard: 'shardRS1', nChunks: 1 },
+          { shard: 'shardRS2', nChunks: 1 },
+          { shard: 'shardRS3', nChunks: 1 }
+        ],
+        chunks: [
+          { min: { matricule: MinKey() }, max: { matricule: 10000 }, 'on shard': 'shardRS1', 'last modified': Timestamp({ t: 3, i: 1 }) },
+          { min: { matricule: 10000 }, max: { matricule: 20000 }, 'on shard': 'shardRS2', 'last modified': Timestamp({ t: 2, i: 0 }) },
+          { min: { matricule: 20000 }, max: { matricule: MaxKey() }, 'on shard': 'shardRS3', 'last modified': Timestamp({ t: 3, i: 0 }) }
+        ],
+        tags: []
+      }
+    }
+  }
+]
+[direct: mongos] universite>
+#### P2_distrib
+[direct: mongos] universite> db.etudiants.getShardDistribution()
+Shard shardRS2 at shardRS2/localhost:28201,localhost:28202
+{
+  data: '869KiB',
+  docs: 10000,
+  chunks: 1,
+  'estimated data per chunk': '869KiB',
+  'estimated docs per chunk': 10000
+}
+---
+Shard shardRS3 at shardRS3/localhost:28301,localhost:28302
+{
+  data: '869KiB',
+  docs: 10001,
+  chunks: 1,
+  'estimated data per chunk': '869KiB',
+  'estimated docs per chunk': 10001
+}
+---
+Shard shardRS1 at shardRS1/localhost:28101,localhost:28102
+{
+  data: '877KiB',
+  docs: 30000,
+  chunks: 1,
+  'estimated data per chunk': '877KiB',
+  'estimated docs per chunk': 30000
+}
+---
+Totals
+{
+  data: '2.55MiB',
+  docs: 50001,
+  chunks: 3,
+  'Shard shardRS2': [
+    '33.22 % data',
+    '19.99 % docs in cluster',
+    '88B avg obj size on shard'
+  ],
+  'Shard shardRS3': [
+    '33.22 % data',
+    '20 % docs in cluster',
+    '89B avg obj size on shard'
+  ],
+  'Shard shardRS1': [
+    '33.55 % data',
+    '59.99 % docs in cluster',
+    '88B avg obj size on shard'
+  ]
+}
+[direct: mongos] universite>
+#### P2_q1
+[direct: mongos] universite> db.etudiants.find({matricule:500})
+[
+  {
+    _id: ObjectId('6af1856f4f8bc9df7ddef292'),
+    matricule: 500,
+    nom: 'Etudiant_500',
+    age: 18,
+    filiere: 'DevWeb'
+  }
+]
+[direct: mongos] universite>
+#### P2_q2
+[direct: mongos] universite> db.etudiants.find({matricule:{$gte:100,$lt:200}})
+[
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef102'),
+    matricule: 100,
+    nom: 'Etudiant_100',
+    age: 18,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef103'),
+    matricule: 101,
+    nom: 'Etudiant_101',
+    age: 19,
+    filiere: 'DevWeb'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef104'),
+    matricule: 102,
+    nom: 'Etudiant_102',
+    age: 20,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef105'),
+    matricule: 103,
+    nom: 'Etudiant_103',
+    age: 21,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef106'),
+    matricule: 104,
+    nom: 'Etudiant_104',
+    age: 22,
+    filiere: 'DevWeb'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef107'),
+    matricule: 105,
+    nom: 'Etudiant_105',
+    age: 23,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef108'),
+    matricule: 106,
+    nom: 'Etudiant_106',
+    age: 24,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef109'),
+    matricule: 107,
+    nom: 'Etudiant_107',
+    age: 25,
+    filiere: 'DevWeb'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef10a'),
+    matricule: 108,
+    nom: 'Etudiant_108',
+    age: 26,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef10b'),
+    matricule: 109,
+    nom: 'Etudiant_109',
+    age: 27,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef10c'),
+    matricule: 110,
+    nom: 'Etudiant_110',
+    age: 18,
+    filiere: 'DevWeb'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef10d'),
+    matricule: 111,
+    nom: 'Etudiant_111',
+    age: 19,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef10e'),
+    matricule: 112,
+    nom: 'Etudiant_112',
+    age: 20,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef10f'),
+    matricule: 113,
+    nom: 'Etudiant_113',
+    age: 21,
+    filiere: 'DevWeb'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef110'),
+    matricule: 114,
+    nom: 'Etudiant_114',
+    age: 22,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef111'),
+    matricule: 115,
+    nom: 'Etudiant_115',
+    age: 23,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef112'),
+    matricule: 116,
+    nom: 'Etudiant_116',
+    age: 24,
+    filiere: 'DevWeb'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef113'),
+    matricule: 117,
+    nom: 'Etudiant_117',
+    age: 25,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef114'),
+    matricule: 118,
+    nom: 'Etudiant_118',
+    age: 26,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af1856e4f8bc9df7ddef115'),
+    matricule: 119,
+    nom: 'Etudiant_119',
+    age: 27,
+    filiere: 'DevWeb'
+  }
+]
+Type "it" for more
+[direct: mongos] universite>
+#### P2_q3
+[direct: mongos] universite> db.etudiants.find({nom:'Etudiant_500'})
+[
+  {
+    _id: ObjectId('6af1856f4f8bc9df7ddef292'),
+    matricule: 500,
+    nom: 'Etudiant_500',
+    age: 18,
+    filiere: 'DevWeb'
+  }
+]
+[direct: mongos] universite>
+#### P2_q4
+[direct: mongos] universite> db.etudiants.find({filiere:'BigData'})
+[
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0a1'),
+    matricule: 3,
+    nom: 'Etudiant_3',
+    age: 21,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0a4'),
+    matricule: 6,
+    nom: 'Etudiant_6',
+    age: 24,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0a7'),
+    matricule: 9,
+    nom: 'Etudiant_9',
+    age: 27,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0aa'),
+    matricule: 12,
+    nom: 'Etudiant_12',
+    age: 20,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0ad'),
+    matricule: 15,
+    nom: 'Etudiant_15',
+    age: 23,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0b0'),
+    matricule: 18,
+    nom: 'Etudiant_18',
+    age: 26,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0b3'),
+    matricule: 21,
+    nom: 'Etudiant_21',
+    age: 19,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0b6'),
+    matricule: 24,
+    nom: 'Etudiant_24',
+    age: 22,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0b9'),
+    matricule: 27,
+    nom: 'Etudiant_27',
+    age: 25,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0bc'),
+    matricule: 30,
+    nom: 'Etudiant_30',
+    age: 18,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0bf'),
+    matricule: 33,
+    nom: 'Etudiant_33',
+    age: 21,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0c2'),
+    matricule: 36,
+    nom: 'Etudiant_36',
+    age: 24,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0c5'),
+    matricule: 39,
+    nom: 'Etudiant_39',
+    age: 27,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0c8'),
+    matricule: 42,
+    nom: 'Etudiant_42',
+    age: 20,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0cb'),
+    matricule: 45,
+    nom: 'Etudiant_45',
+    age: 23,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0ce'),
+    matricule: 48,
+    nom: 'Etudiant_48',
+    age: 26,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0d1'),
+    matricule: 51,
+    nom: 'Etudiant_51',
+    age: 19,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0d4'),
+    matricule: 54,
+    nom: 'Etudiant_54',
+    age: 22,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0d7'),
+    matricule: 57,
+    nom: 'Etudiant_57',
+    age: 25,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1856d4f8bc9df7ddef0da'),
+    matricule: 60,
+    nom: 'Etudiant_60',
+    age: 18,
+    filiere: 'BigData'
+  }
+]
+Type "it" for more
+[direct: mongos] universite>
+#### P2_q4c
+[direct: mongos] universite> db.etudiants.countDocuments({filiere:'BigData'})
+10000
+[direct: mongos] universite>
+#### P2_ex1
+[direct: mongos] universite> e = db.etudiants.find({matricule:500}).explain('executionStats')
+{ stage: e.queryPlanner.winningPlan.stage,
+  shards: e.queryPlanner.winningPlan.shards.map(s => s.shardName),
+  nReturned: e.executionStats.nReturned,
+  totalDocsExamined: e.executionStats.totalDocsExamined }
+{
+  stage: 'SINGLE_SHARD',
+  shards: [ 'shardRS1' ],
+  nReturned: 1,
+  totalDocsExamined: 1,
+  executionTimeMillis: 0
+}
+[direct: mongos] universite>
+#### P2_ex2
+[direct: mongos] universite> e = db.etudiants.find({nom:'Etudiant_500'}).explain('executionStats')
+{ stage: e.queryPlanner.winningPlan.stage,
+  shards: e.queryPlanner.winningPlan.shards.map(s => s.shardName),
+  nReturned: e.executionStats.nReturned,
+  totalDocsExamined: e.executionStats.totalDocsExamined }
+{
+  stage: 'SHARD_MERGE',
+  shards: [ 'shardRS1', 'shardRS2', 'shardRS3' ],
+  nReturned: 1,
+  totalDocsExamined: 50001,
+  executionTimeMillis: 17
+}
+[direct: mongos] universite>
+===== s_p2_tests.txt
+#### P2_use
+[direct: mongos] test> use universite
+switched to db universite
+[direct: mongos] universite>
+#### P2_drop
+[direct: mongos] universite> db.etudiants.drop()
+true
+[direct: mongos] universite>
+#### P2_insert
+[direct: mongos] universite> for (let i=1; i<=30000; i++) {
+  db.etudiants.insertOne({
+    matricule:i,
+    nom:'Etudiant_'+i,
+    age:18+(i%10),
+    filiere:['BigData','IA','DevWeb'][i%3]
+  })
+}
+{
+  acknowledged: true,
+  insertedId: ObjectId('6af186655a61ca02d9f4f9af')
+}
+[direct: mongos] universite>
+#### P2_count
+[direct: mongos] universite> db.etudiants.countDocuments()
+30000
+[direct: mongos] universite>
+#### P2_index
+[direct: mongos] universite> db.etudiants.createIndex({matricule:1})
+matricule_1
+[direct: mongos] universite>
+#### P2_shard
+[direct: mongos] universite> sh.shardCollection('universite.etudiants',{matricule:1})
+{
+  collectionsharded: 'universite.etudiants',
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213477, i: 202 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213477, i: 202 })
+}
+[direct: mongos] universite>
+#### P2_split1
+[direct: mongos] universite> sh.splitAt('universite.etudiants',{matricule:10000})
+{
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213478, i: 10 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213478, i: 10 })
+}
+[direct: mongos] universite>
+#### P2_split2
+[direct: mongos] universite> sh.splitAt('universite.etudiants',{matricule:20000})
+{
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213478, i: 19 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213478, i: 19 })
+}
+[direct: mongos] universite>
+#### P2_move2
+[direct: mongos] universite> sh.moveChunk('universite.etudiants',{matricule:15000},'shardRS2')
+{
+  millis: 542,
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213478, i: 15379 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213478, i: 15201 })
+}
+[direct: mongos] universite>
+#### P2_move3
+[direct: mongos] universite> sh.moveChunk('universite.etudiants',{matricule:25000},'shardRS3')
+{
+  millis: 788,
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1794213479, i: 12773 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1794213479, i: 11327 })
+}
+[direct: mongos] universite>
+#### P2_status2
+[direct: mongos] universite> sh.status()
+shardingVersion
+{ _id: 1, clusterId: ObjectId('6af1853aef984d61cc1bf0e4') }
+---
+shards
+[
+  {
+    _id: 'shardRS1',
+    host: 'shardRS1/localhost:28101,localhost:28102',
+    state: 1,
+    topologyTime: Timestamp({ t: 1794213229, i: 2 })
+  },
+  {
+    _id: 'shardRS2',
+    host: 'shardRS2/localhost:28201,localhost:28202',
+    state: 1,
+    topologyTime: Timestamp({ t: 1794213229, i: 6 })
+  },
+  {
+    _id: 'shardRS3',
+    host: 'shardRS3/localhost:28301,localhost:28302',
+    state: 1,
+    topologyTime: Timestamp({ t: 1794213229, i: 19 })
+  }
+]
+---
+active mongoses
+[ { '7.0.34': 1 } ]
+---
+autosplit
+{ 'Currently enabled': 'yes' }
+---
+balancer
+{
+  'Currently enabled': 'yes',
+  'Currently running': 'no',
+  'Failed balancer rounds in last 5 attempts': 0,
+  'Migration Results for the last 24 hours': { '4': 'Success' }
+}
+---
+shardedDataDistribution
+[
+  {
+    ns: 'universite.etudiants',
+    shards: [
+      {
+        shardName: 'shardRS3',
+        numOrphanedDocs: 0,
+        numOwnedDocuments: 10001,
+        ownedSizeBytes: 890089,
+        orphanedSizeBytes: 0
+      },
+      {
+        shardName: 'shardRS2',
+        numOrphanedDocs: 0,
+        numOwnedDocuments: 10000,
+        ownedSizeBytes: 880000,
+        orphanedSizeBytes: 0
+      },
+      {
+        shardName: 'shardRS1',
+        numOrphanedDocs: 0,
+        numOwnedDocuments: 9999,
+        ownedSizeBytes: 869913,
+        orphanedSizeBytes: 0
+      }
+    ]
+  },
+  {
+    ns: 'config.system.sessions',
+    shards: [
+      {
+        shardName: 'shardRS1',
+        numOrphanedDocs: 0,
+        numOwnedDocuments: 30,
+        ownedSizeBytes: 2970,
+        orphanedSizeBytes: 0
+      }
+    ]
+  }
+]
+---
+databases
+[
+  {
+    database: { _id: 'config', primary: 'config', partitioned: true },
+    collections: {
+      'config.system.sessions': {
+        shardKey: { _id: 1 },
+        unique: false,
+        balancing: true,
+        chunkMetadata: [ { shard: 'shardRS1', nChunks: 1 } ],
+        chunks: [
+          { min: { _id: MinKey() }, max: { _id: MaxKey() }, 'on shard': 'shardRS1', 'last modified': Timestamp({ t: 1, i: 0 }) }
+        ],
+        tags: []
+      }
+    }
+  },
+  {
+    database: {
+      _id: 'universite',
+      primary: 'shardRS1',
+      partitioned: false,
+      version: {
+        uuid: UUID('d04183a6-cd5e-4e02-83b4-605accc18a63'),
+        timestamp: Timestamp({ t: 1794213229, i: 22 }),
+        lastMod: 1
+      }
+    },
+    collections: {
+      'universite.etudiants': {
+        shardKey: { matricule: 1 },
+        unique: false,
+        balancing: true,
+        chunkMetadata: [
+          { shard: 'shardRS1', nChunks: 1 },
+          { shard: 'shardRS2', nChunks: 1 },
+          { shard: 'shardRS3', nChunks: 1 }
+        ],
+        chunks: [
+          { min: { matricule: MinKey() }, max: { matricule: 10000 }, 'on shard': 'shardRS1', 'last modified': Timestamp({ t: 3, i: 1 }) },
+          { min: { matricule: 10000 }, max: { matricule: 20000 }, 'on shard': 'shardRS2', 'last modified': Timestamp({ t: 2, i: 0 }) },
+          { min: { matricule: 20000 }, max: { matricule: MaxKey() }, 'on shard': 'shardRS3', 'last modified': Timestamp({ t: 3, i: 0 }) }
+        ],
+        tags: []
+      }
+    }
+  }
+]
+[direct: mongos] universite>
+#### P2_distrib
+[direct: mongos] universite> db.etudiants.getShardDistribution()
+Shard shardRS3 at shardRS3/localhost:28301,localhost:28302
+{
+  data: '869KiB',
+  docs: 10001,
+  chunks: 1,
+  'estimated data per chunk': '869KiB',
+  'estimated docs per chunk': 10001
+}
+---
+Shard shardRS2 at shardRS2/localhost:28201,localhost:28202
+{
+  data: '869KiB',
+  docs: 10000,
+  chunks: 1,
+  'estimated data per chunk': '869KiB',
+  'estimated docs per chunk': 10000
+}
+---
+Shard shardRS1 at shardRS1/localhost:28101,localhost:28102
+{
+  data: '858KiB',
+  docs: 9999,
+  chunks: 1,
+  'estimated data per chunk': '858KiB',
+  'estimated docs per chunk': 9999
+}
+---
+Totals
+{
+  data: '2.53MiB',
+  docs: 30000,
+  chunks: 3,
+  'Shard shardRS3': [
+    '33.47 % data',
+    '33.33 % docs in cluster',
+    '89B avg obj size on shard'
+  ],
+  'Shard shardRS2': [
+    '33.47 % data',
+    '33.33 % docs in cluster',
+    '88B avg obj size on shard'
+  ],
+  'Shard shardRS1': [
+    '33.05 % data',
+    '33.33 % docs in cluster',
+    '87B avg obj size on shard'
+  ]
+}
+[direct: mongos] universite>
+#### P2_q1
+[direct: mongos] universite> db.etudiants.find({matricule:500})
+[
+  {
+    _id: ObjectId('6af185fa5a61ca02d9f48673'),
+    matricule: 500,
+    nom: 'Etudiant_500',
+    age: 18,
+    filiere: 'DevWeb'
+  }
+]
+[direct: mongos] universite>
+#### P2_q2
+[direct: mongos] universite> db.etudiants.find({matricule:{$gte:100,$lt:200}})
+[
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484e3'),
+    matricule: 100,
+    nom: 'Etudiant_100',
+    age: 18,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484e4'),
+    matricule: 101,
+    nom: 'Etudiant_101',
+    age: 19,
+    filiere: 'DevWeb'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484e5'),
+    matricule: 102,
+    nom: 'Etudiant_102',
+    age: 20,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484e6'),
+    matricule: 103,
+    nom: 'Etudiant_103',
+    age: 21,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484e7'),
+    matricule: 104,
+    nom: 'Etudiant_104',
+    age: 22,
+    filiere: 'DevWeb'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484e8'),
+    matricule: 105,
+    nom: 'Etudiant_105',
+    age: 23,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484e9'),
+    matricule: 106,
+    nom: 'Etudiant_106',
+    age: 24,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484ea'),
+    matricule: 107,
+    nom: 'Etudiant_107',
+    age: 25,
+    filiere: 'DevWeb'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484eb'),
+    matricule: 108,
+    nom: 'Etudiant_108',
+    age: 26,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484ec'),
+    matricule: 109,
+    nom: 'Etudiant_109',
+    age: 27,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484ed'),
+    matricule: 110,
+    nom: 'Etudiant_110',
+    age: 18,
+    filiere: 'DevWeb'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484ee'),
+    matricule: 111,
+    nom: 'Etudiant_111',
+    age: 19,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484ef'),
+    matricule: 112,
+    nom: 'Etudiant_112',
+    age: 20,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484f0'),
+    matricule: 113,
+    nom: 'Etudiant_113',
+    age: 21,
+    filiere: 'DevWeb'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484f1'),
+    matricule: 114,
+    nom: 'Etudiant_114',
+    age: 22,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484f2'),
+    matricule: 115,
+    nom: 'Etudiant_115',
+    age: 23,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484f3'),
+    matricule: 116,
+    nom: 'Etudiant_116',
+    age: 24,
+    filiere: 'DevWeb'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484f4'),
+    matricule: 117,
+    nom: 'Etudiant_117',
+    age: 25,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484f5'),
+    matricule: 118,
+    nom: 'Etudiant_118',
+    age: 26,
+    filiere: 'IA'
+  },
+  {
+    _id: ObjectId('6af185f85a61ca02d9f484f6'),
+    matricule: 119,
+    nom: 'Etudiant_119',
+    age: 27,
+    filiere: 'DevWeb'
+  }
+]
+Type "it" for more
+[direct: mongos] universite>
+#### P2_q3
+[direct: mongos] universite> db.etudiants.find({nom:'Etudiant_500'})
+[
+  {
+    _id: ObjectId('6af185fa5a61ca02d9f48673'),
+    matricule: 500,
+    nom: 'Etudiant_500',
+    age: 18,
+    filiere: 'DevWeb'
+  }
+]
+[direct: mongos] universite>
+#### P2_q4
+[direct: mongos] universite> db.etudiants.find({filiere:'BigData'})
+[
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4ab91'),
+    matricule: 10002,
+    nom: 'Etudiant_10002',
+    age: 20,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4ab94'),
+    matricule: 10005,
+    nom: 'Etudiant_10005',
+    age: 23,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4ab97'),
+    matricule: 10008,
+    nom: 'Etudiant_10008',
+    age: 26,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4ab9a'),
+    matricule: 10011,
+    nom: 'Etudiant_10011',
+    age: 19,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4ab9d'),
+    matricule: 10014,
+    nom: 'Etudiant_10014',
+    age: 22,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4aba0'),
+    matricule: 10017,
+    nom: 'Etudiant_10017',
+    age: 25,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4aba3'),
+    matricule: 10020,
+    nom: 'Etudiant_10020',
+    age: 18,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4aba6'),
+    matricule: 10023,
+    nom: 'Etudiant_10023',
+    age: 21,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4aba9'),
+    matricule: 10026,
+    nom: 'Etudiant_10026',
+    age: 24,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4abac'),
+    matricule: 10029,
+    nom: 'Etudiant_10029',
+    age: 27,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4abaf'),
+    matricule: 10032,
+    nom: 'Etudiant_10032',
+    age: 20,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4abb2'),
+    matricule: 10035,
+    nom: 'Etudiant_10035',
+    age: 23,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4abb5'),
+    matricule: 10038,
+    nom: 'Etudiant_10038',
+    age: 26,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4abb8'),
+    matricule: 10041,
+    nom: 'Etudiant_10041',
+    age: 19,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4abbb'),
+    matricule: 10044,
+    nom: 'Etudiant_10044',
+    age: 22,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4abbe'),
+    matricule: 10047,
+    nom: 'Etudiant_10047',
+    age: 25,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4abc1'),
+    matricule: 10050,
+    nom: 'Etudiant_10050',
+    age: 18,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4abc4'),
+    matricule: 10053,
+    nom: 'Etudiant_10053',
+    age: 21,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4abc7'),
+    matricule: 10056,
+    nom: 'Etudiant_10056',
+    age: 24,
+    filiere: 'BigData'
+  },
+  {
+    _id: ObjectId('6af1861d5a61ca02d9f4abca'),
+    matricule: 10059,
+    nom: 'Etudiant_10059',
+    age: 27,
+    filiere: 'BigData'
+  }
+]
+Type "it" for more
+[direct: mongos] universite>
+#### P2_q4c
+[direct: mongos] universite> db.etudiants.countDocuments({filiere:'BigData'})
+10000
+[direct: mongos] universite>
+#### P2_ex1
+[direct: mongos] universite> e = db.etudiants.find({matricule:500}).explain('executionStats')
+{ stage: e.queryPlanner.winningPlan.stage,
+  shards: e.queryPlanner.winningPlan.shards.map(s => s.shardName),
+  nReturned: e.executionStats.nReturned,
+  totalDocsExamined: e.executionStats.totalDocsExamined }
+{
+  stage: 'SINGLE_SHARD',
+  shards: [ 'shardRS1' ],
+  nReturned: 1,
+  totalDocsExamined: 1,
+  executionTimeMillis: 0
+}
+[direct: mongos] universite>
+#### P2_ex2
+[direct: mongos] universite> e = db.etudiants.find({nom:'Etudiant_500'}).explain('executionStats')
+{ stage: e.queryPlanner.winningPlan.stage,
+  shards: e.queryPlanner.winningPlan.shards.map(s => s.shardName),
+  nReturned: e.executionStats.nReturned,
+  totalDocsExamined: e.executionStats.totalDocsExamined }
+{
+  stage: 'SHARD_MERGE',
+  shards: [ 'shardRS3', 'shardRS1', 'shardRS2' ],
+  nReturned: 1,
+  totalDocsExamined: 30000,
+  executionTimeMillis: 12
+}
+[direct: mongos] universite>
+===== s_p2_panne.txt
+shardRS1 [direct: primary] test> rs.status().members.forEach(m => print(m.name + " -> " + m.stateStr))
+localhost:28101 -> PRIMARY
+localhost:28102 -> SECONDARY
+shardRS1 [direct: primary] test>
+#### P2_pa_status
+shardRS1 [direct: secondary] test> rs.status().members.forEach(m => print(m.name + " -> " + m.stateStr))
+localhost:28101 -> (not reachable/healthy)
+localhost:28102 -> SECONDARY
+shardRS1 [direct: secondary] test>
+#### P2_pa_writable
+shardRS1 [direct: secondary] test> db.hello().isWritablePrimary
+false
+shardRS1 [direct: secondary] test>
+#### P2_pa_q1
+[direct: mongos] universite> db.etudiants.find({matricule:500})   // chunk sur shardRS1
+MongoServerError: Encountered non-retryable error during query :: caused by :: Could not find host matching read preference { mode: "primary" } for set shardRS1
+[direct: mongos] universite>
+#### P2_pa_q2
+[direct: mongos] universite> db.etudiants.find({matricule:25000})   // chunk sur shardRS3
+[
+  {
+    _id: ObjectId('6af186535a61ca02d9f4e627'),
+    matricule: 25000,
+    nom: 'Etudiant_25000',
+    age: 18,
+    filiere: 'IA'
+  }
+]
+[direct: mongos] universite>
+#### P2_pa_ins
+[direct: mongos] universite> db.etudiants.insertOne({matricule:600, nom:'TestPanne'})
+MongoServerError: Write results unavailable from failing to target a host in the shard shardRS1 :: caused by :: Could not find host matching read preference { mode: "primary" } for set shardRS1
+[direct: mongos] universite>
+#### P2_ret_status
+shardRS1 [direct: primary] test> rs.status().members.forEach(m => print(m.name + " -> " + m.stateStr))
+localhost:28101 -> SECONDARY
+localhost:28102 -> PRIMARY
+shardRS1 [direct: primary] test>
+[direct: mongos] universite> db.etudiants.find({matricule:500})
+[
+  {
+    _id: ObjectId('6af185fa5a61ca02d9f48673'),
+    matricule: 500,
+    nom: 'Etudiant_500',
+    age: 18,
+    filiere: 'DevWeb'
+  }
+]
+[direct: mongos] universite>

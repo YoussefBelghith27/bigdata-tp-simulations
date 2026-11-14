@@ -14,7 +14,7 @@ Chaque TP propose :
 |---|---|---|---|---|
 | TP1 | Installation de MongoDB 7.0 et de mongosh sous Windows 11 | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp1-installation) | [PDF](cr/CR_TP1_Installation_MongoDB.pdf) | [.approj](activepresenter/TP1_Installation_MongoDB_Simulation.approj) |
 | TP2 | Requêtes MongoDB sur la base Restaurants (mongoimport + 26 requêtes) | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp2-resto) | [PDF](cr/CR_TP2_Requetes_Restaurants.pdf) | [.approj](activepresenter/TP2_Requetes_Restaurants_Simulation.approj) |
-| TP3 | Réplication et sharding | à venir | à venir | à venir |
+| TP3 | Haute disponibilité et sharding (Replica Set, failover, cluster shardé) | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp3-replication-sharding) | [PDF](cr/CR_TP3_Replication_Sharding.pdf) | [.approj](activepresenter/TP3_Replication_Sharding_Simulation.approj) |
 
 ## TP1 en bref
 
@@ -38,6 +38,18 @@ Les captures du compte rendu sont dans [`tp1/captures/`](tp1/captures). La sorti
 
 La sortie réelle des requêtes, exécutées sur mon poste, est dans [`tp2/sortie_mongosh_reelle.txt`](tp2/sortie_mongosh_reelle.txt), avec le script [`tp2/tp2_requetes.js`](tp2/tp2_requetes.js).
 
+## TP3 en bref
+
+73 diapositives, 56 saisies. Plusieurs fenêtres `mongod` tournent en parallèle ; elles sont affichées côte à côte.
+
+1. **Replica Set rs0** : les cinq `mongod` de 27017 à 27021, puis `rs.initiate()`. Le rôle de chaque membre est vérifié, la réplication est lue sur un Secondary et l'oplog est consulté.
+2. **Failover** : Ctrl+C sur le Primary, élection de 27018, écriture qui continue, puis retour de 27017 comme Secondary.
+3. **Cluster shardé** : configRS, shardRS1 à shardRS3 et `mongos`. 30 000 documents sont shardés sur `matricule`, découpés en 3 chunks (un par shard) et répartis avec `getShardDistribution()`.
+4. **Routage** : `explain()` donne SINGLE_SHARD avec la shard key et SHARD_MERGE sans elle.
+5. **Panne d'un shard à deux membres** : sans majorité, aucune élection n'a lieu et la plage de données de ce shard devient indisponible.
+
+Les sorties réelles sont dans [`tp3/sortie_mongosh_reelle.txt`](tp3/sortie_mongosh_reelle.txt).
+
 ## Organisation des fichiers
 
 ```
@@ -47,7 +59,7 @@ assets/               styles, catalogue des TP, lecteur
 sims/                 données de chaque simulation (écrans + interactions)
 cr/                   comptes rendus PDF
 activepresenter/      projets ActivePresenter (.approj)
-tp1/, tp2/            captures du compte rendu et sorties réelles de mongosh
+tp1/ … tp3/           captures du compte rendu et sorties réelles de mongosh
 tools/                scripts de génération (écrans, simulation, .approj, PDF)
 ```
 

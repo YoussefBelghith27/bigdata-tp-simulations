@@ -19,9 +19,11 @@ T = [
          cmds=["mongoimport --db Restaurants --collection restaurant --file restaurants.json", "{ grades: { $elemMatch: { score: { $gt: 80, $lt: 100 } } } }", "{ name: /^Mad/ }"],
          cr="cr/CR_TP2_Requetes_Restaurants.pdf", approj="activepresenter/TP2_Requetes_Restaurants_Simulation.approj",
          tool="mongosh 2.12 · Database Tools 100.19", origin="Sorties mongosh réelles (mon poste), écrans Windows reconstitués", real=False),
-    dict(id="tp3-replication-sharding", group="dist", num="TP3", title="Réplication et sharding",
-         desc="Replica set à 5 nœuds avec arbitre et bascule du primaire, puis cluster shardé : 3 serveurs de configuration, 3 shards et un routeur mongos.",
-         cmds=["rs.initiate()", "rs.status()", "sh.shardCollection()"], tool="mongod · mongos", soon=True),
+    dict(id="tp3-replication-sharding", group="dist", num="TP3", title="Haute disponibilité et sharding",
+         desc="Replica Set rs0 (1 Primary, 3 Secondary, 1 Arbiter) : réplication, oplog, panne du Primary et élection. Puis cluster shardé : configRS, trois shards en Replica Set, mongos, shard key matricule, chunks, routage ciblé ou diffusé (explain) et panne d'un shard à deux membres.",
+         cmds=["mongod --dbpath C:\\mongodb\\tp3\\data\\node1 --port 27017 --replSet rs0", "rs.status()", "sh.shardCollection('universite.etudiants',{matricule:1})", "db.etudiants.getShardDistribution()"],
+         cr="cr/CR_TP3_Replication_Sharding.pdf", approj="activepresenter/TP3_Replication_Sharding_Simulation.approj",
+         tool="mongod · mongos · mongosh", origin="Sorties mongosh réelles, fenêtres mongod reconstituées", real=False),
 ]
 for t in T:
     if not t.get("soon"):
