@@ -17,6 +17,7 @@ Chaque TP propose :
 | TP3 | Haute disponibilité et sharding (Replica Set, failover, cluster shardé) | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp3-replication-sharding) | [PDF](cr/CR_TP3_Replication_Sharding.pdf) | [.approj](activepresenter/TP3_Replication_Sharding_Simulation.approj) |
 | TP4 | Cassandra : CQL, modélisation et cluster Docker à 3 nœuds | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp4-cassandra) | [PDF](cr/CR_TP4_Cassandra.pdf) | [.approj](activepresenter/TP4_Cassandra_Simulation.approj) |
 | TP5 | Cluster Hadoop : HDFS, YARN, MapReduce, Spark et Hive | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp5-hadoop) | [PDF](cr/CR_TP5_Hadoop_Spark_Hive.pdf) | [.approj](activepresenter/TP5_Hadoop_Spark_Hive_Simulation.approj) |
+| TP6 | Spark sur un cluster Hadoop : RDD, DataFrame, Spark SQL et Hive | [Lancer](https://youssefbelghith27.github.io/bigdata-tp-simulations/simulation.html?tp=tp6-spark) | [PDF](cr/CR_TP6_Spark_Cluster_Hadoop.pdf) | [.approj](activepresenter/TP6_Spark_Cluster_Hadoop_Simulation.approj) |
 
 ## TP1 en bref
 
@@ -82,6 +83,21 @@ Origine des sorties :
 - Les calculs sont réels : scripts Python exécutés, sortie PySpark, agrégats calculés sur le CSV et `pi` recalculé avec la séquence de Halton de Hadoop (voir [`tp5/sorties_reelles.txt`](tp5/sorties_reelles.txt)).
 - Les messages HDFS, YARN et Hive sont reconstitués.
 
+## TP6 en bref
+
+101 diapositives, 68 saisies : les 19 activités, dans le shell PySpark et le conteneur hadoop-master.
+
+1. **RDD** : SparkContext, `parallelize`, `glom()`, transformations et actions, `reduceByKey`, document texte et CSV, `cache()`, `repartition`/`coalesce`, `saveAsTextFile` et l'erreur « already exists ».
+2. **spark-submit** : `spark_tp_rdd.py` sur YARN (l'application TP6-RDD se termine en SUCCEEDED).
+3. **DataFrame et Spark SQL** : schéma, `groupBy`/`agg`, vue temporaire, `explain()`, CSV et Parquet (partitionné par ville).
+4. **Spark + Hive** : lecture de `rsi3.restaurants`, création de `villes_spark` et `cuisines_spark`, puis l'application `spark_df_hive.py`.
+
+Origine des sorties :
+- Toutes les sorties PySpark sont réelles (Spark 3.5.3, voir [`tp6/sortie_pyspark_reelle.txt`](tp6/sortie_pyspark_reelle.txt)).
+- Les valeurs propres à YARN (master, applicationId, liste des applications) sont reconstituées.
+
+Les scripts complétés sont dans [`tp6/scripts/`](tp6/scripts).
+
 ## Organisation des fichiers
 
 ```
@@ -91,7 +107,7 @@ assets/               styles, catalogue des TP, lecteur
 sims/                 données de chaque simulation (écrans + interactions)
 cr/                   comptes rendus PDF
 activepresenter/      projets ActivePresenter (.approj)
-tp1/ … tp5/           captures du compte rendu et sorties réelles de mongosh
+tp1/ … tp6/           captures du compte rendu et sorties réelles de mongosh
 tools/                scripts de génération (écrans, simulation, .approj, PDF)
 ```
 

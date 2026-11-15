@@ -1,0 +1,526 @@
+>>> sc
+<SparkContext master=local[2] appName=PySparkShell>
+>>> print(sc.version)
+3.5.3
+>>> print(sc.master)
+local[2]
+>>> print(sc.appName)
+PySparkShell
+>>> print(sc.defaultParallelism)
+2
+>>> nombres = sc.parallelize(range(1, 11))
+>>> print(type(nombres))
+<class 'pyspark.rdd.PipelinedRDD'>
+>>> print(nombres.collect())
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+>>> grand = sc.parallelize(range(1, 101), 4)
+>>> print(grand.getNumPartitions())
+4
+>>> fruits = sc.parallelize(["pomme", "banane", "orange"])
+>>> print(fruits.collect())
+['pomme', 'banane', 'orange']
+>>> notes = sc.parallelize([("Ali", 14), ("Sana", 17), ("Omar", 12)])
+>>> print(notes.collect())
+[('Ali', 14), ('Sana', 17), ('Omar', 12)]
+>>> rdd = sc.parallelize(range(1, 13), 3)
+>>> print(rdd.getNumPartitions())
+3
+>>> print(rdd.glom().collect())
+[[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
+>>> print(rdd.glom().map(len).collect())
+[4, 4, 4]
+>>> print(rdd.mapPartitionsWithIndex(
+...     lambda i, it: [(i, sum(it))]).collect())
+[(0, 10), (1, 26), (2, 42)]
+>>> print(sc.parallelize(range(1, 13), 5).glom().collect())
+[[1, 2], [3, 4], [5, 6, 7], [8, 9], [10, 11, 12]]
+>>> carres = nombres.map(lambda x: x * x)
+>>> pairs = nombres.filter(lambda x: x % 2 == 0)
+>>> print(carres.collect())
+[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+>>> print(pairs.collect())
+[2, 4, 6, 8, 10]
+>>> phrases = sc.parallelize([
+...     "spark traite les données",
+...     "spark utilise les RDD",
+...     "les données sont distribuées"])
+>>> mots = phrases.flatMap(lambda p: p.split())
+>>> print(mots.collect())
+['spark', 'traite', 'les', 'données', 'spark', 'utilise', 'les', 'RDD', 'les', 'données', 'sont', 'distribuées']
+>>> uniques = mots.distinct()
+>>> print(uniques.count())
+8
+>>> print(phrases.map(lambda p: p.split()).collect())
+[['spark', 'traite', 'les', 'données'], ['spark', 'utilise', 'les', 'RDD'], ['les', 'données', 'sont', 'distribuées']]
+>>> print(nombres.count())
+10
+>>> print(nombres.first())
+1
+>>> print(nombres.take(3))
+[1, 2, 3]
+>>> print(nombres.top(3))
+[10, 9, 8]
+>>> print(nombres.reduce(lambda a, b: a + b))
+55
+>>> print(nombres.sum(), nombres.max(), nombres.mean())
+55 10 5.5
+>>> print(nombres.takeOrdered(4))
+[1, 2, 3, 4]
+>>> print(sc.parallelize(range(1, 7)).reduce(lambda a, b: a * b))
+720
+>>> paires = mots.map(lambda m: (m, 1))
+>>> freq = paires.reduceByKey(lambda a, b: a + b)
+>>> tri = freq.sortBy(lambda kv: kv[1], ascending=False)
+>>> print(tri.take(5))
+[('les', 3), ('spark', 2), ('données', 2), ('traite', 1), ('sont', 1)]
+>>> freq2 = paires.groupByKey().mapValues(sum)
+>>> print(sorted(freq2.collect()))
+[('RDD', 1), ('distribuées', 1), ('données', 2), ('les', 3), ('sont', 1), ('spark', 2), ('traite', 1), ('utilise', 1)]
+>>> chemin = "/user/student/spark/texte.txt"
+>>> lignes = sc.textFile(chemin)
+>>> print("Lignes :", lignes.count())
+Lignes : 3
+>>> mots = lignes.flatMap(lambda l: l.split())
+>>> print("Mots :", mots.count())
+Mots : 20
+>>> print("Mots distincts :", mots.distinct().count())
+Mots distincts : 17
+>>> freq = mots.map(lambda m: (m.lower(), 1)).reduceByKey(lambda a, b: a + b)
+>>> print(freq.sortBy(lambda kv: -kv[1]).take(5))
+[('spark', 3), ('hdfs', 2), ('est', 1), ('un', 1), ('traitement', 1)]
+>>> avec_hdfs = lignes.filter(lambda l: "HDFS" in l)
+>>> print(avec_hdfs.collect())
+['Hadoop fournit HDFS et YARN pour Spark', 'Spark lit les données depuis HDFS']
+>>> print("Plus longue ligne :", lignes.map(len).max())
+Plus longue ligne : 43
+>>> import csv
+>>> brut = sc.textFile("/user/student/input/restaurants.csv")
+>>> entete = brut.first()
+>>> donnees = brut.filter(lambda l: l != entete)
+>>> def parse(ligne):
+...     return next(csv.reader([ligne]))
+>>> restos = donnees.map(parse)
+>>> print(restos.take(2))
+[['1', 'Restaurant Sahel', 'Sfax', 'Italienne', '4.6', 'bas'], ['2', 'Le Coin de Oasis', 'Kairouan', 'Fruits de mer', '3.7', 'eleve']]
+>>> par_ville = restos.map(lambda r: (r[2], 1)).reduceByKey(lambda a, b: a + b)
+>>> print(par_ville.sortBy(lambda kv: -kv[1]).collect())
+[('Tunis', 16695), ('Sousse', 9188), ('Sfax', 9138), ('Nabeul', 7626), ('Hammamet', 6872), ('Djerba', 6133), ('Monastir', 5374), ('Bizerte', 5227), ('Kairouan', 4631), ('Mahdia', 3838), ('Gabes', 3031), ('Tozeur', 2247)]
+>>> par_cuisine = restos.map(lambda r: (r[3], 1)).reduceByKey(lambda a, b: a + b)
+>>> print(par_cuisine.sortBy(lambda kv: -kv[1]).collect())
+[('Tunisienne', 8094), ('Libanaise', 8086), ('Pizzeria', 8071), ('Turque', 8038), ('Grill', 8013), ('Francaise', 8005), ('Asiatique', 7991), ('Italienne', 7945), ('Fast-food', 7884), ('Fruits de mer', 7873)]
+>>> def valide(r):
+...     try:
+...         float(r[4]); return True
+...     except (ValueError, IndexError):
+...         return False
+>>> valides = restos.filter(valide)
+>>> somme = valides.map(lambda r: (r[3], (float(r[4]), 1))) \
+...                .reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1]))
+>>> moyennes = somme.mapValues(lambda s: round(s[0] / s[1], 2))
+>>> print(moyennes.sortBy(lambda kv: -kv[1]).collect())
+[('Tunisienne', 4.08), ('Fruits de mer', 4.0), ('Francaise', 3.9), ('Grill', 3.8), ('Italienne', 3.79), ('Libanaise', 3.69), ('Asiatique', 3.61), ('Turque', 3.6), ('Pizzeria', 3.49), ('Fast-food', 3.1)]
+>>> print(par_ville.values().sum(), restos.count())
+80000 80000
+>>> import time
+>>> from pyspark import StorageLevel
+>>> def chrono(rdd):
+...     t0 = time.time()
+...     n = rdd.count()
+...     return n, round(time.time() - t0, 3)
+>>> print("sans cache :", chrono(valides), chrono(valides))
+sans cache : (80000, 0.171) (80000, 0.173)
+>>> valides.cache()
+PythonRDD[112] at RDD at PythonRDD.scala:53
+>>> print("cache()    :", chrono(valides), chrono(valides))
+cache()    : (80000, 0.291) (80000, 0.114)
+>>> print(valides.is_cached, valides.getStorageLevel())
+True Memory Serialized 1x Replicated
+>>> valides.unpersist()
+PythonRDD[112] at RDD at PythonRDD.scala:53
+>>> valides.persist(StorageLevel.MEMORY_AND_DISK)
+PythonRDD[112] at RDD at PythonRDD.scala:53
+>>> print(chrono(valides), chrono(valides))
+(80000, 0.286) (80000, 0.081)
+>>> valides.unpersist()
+PythonRDD[112] at RDD at PythonRDD.scala:53
+>>> print("Partitions initiales :", restos.getNumPartitions())
+Partitions initiales : 2
+>>> plus = restos.repartition(6)
+>>> print(plus.getNumPartitions(), plus.glom().map(len).collect())
+6 [13330, 13330, 13330, 13331, 13340, 13339]
+>>> moins = plus.coalesce(2)
+>>> print(moins.getNumPartitions(), moins.glom().map(len).collect())
+2 [39991, 40009]
+>>> un = par_ville.coalesce(1)
+>>> print(un.getNumPartitions())
+1
+>>> sortie = "/user/student/spark/output_villes"
+>>> resultat = par_ville.map(lambda kv: kv[0] + "," + str(kv[1]))
+>>> resultat.saveAsTextFile(sortie)
+>>> resultat.coalesce(1).saveAsTextFile(sortie + "_un_fichier")
+>>> resultat.saveAsTextFile(sortie)
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+  File "/usr/local/lib/python3.13/site-packages/pyspark/rdd.py", line 3425, in saveAsTextFile
+    keyed._jrdd.map(self.ctx._jvm.BytesToString()).saveAsTextFile(path)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/py4j/java_gateway.py", line 1322, in __call__
+    return_value = get_return_value(
+        answer, self.gateway_client, self.target_id, self.name)
+  File "/usr/local/lib/python3.13/site-packages/pyspark/errors/exceptions/captured.py", line 179, in deco
+    return f(*a, **kw)
+  File "/usr/local/lib/python3.13/site-packages/py4j/protocol.py", line 326, in get_return_value
+    raise Py4JJavaError(
+        "An error occurred while calling {0}{1}{2}.\n".
+        format(target_id, ".", name), value)
+py4j.protocol.Py4JJavaError: An error occurred while calling o865.saveAsTextFile.
+: org.apache.hadoop.mapred.FileAlreadyExistsException: Output directory file:/user/student/spark/output_villes already exists
+	at org.apache.hadoop.mapred.FileOutputFormat.checkOutputSpecs(FileOutputFormat.java:131)
+	at org.apache.spark.internal.io.HadoopMapRedWriteConfigUtil.assertConf(SparkHadoopWriter.scala:299)
+	at org.apache.spark.internal.io.SparkHadoopWriter$.write(SparkHadoopWriter.scala:71)
+	at org.apache.spark.rdd.PairRDDFunctions.$anonfun$saveAsHadoopDataset$1(PairRDDFunctions.scala:1091)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:112)
+	at org.apache.spark.rdd.RDD.withScope(RDD.scala:410)
+	at org.apache.spark.rdd.PairRDDFunctions.saveAsHadoopDataset(PairRDDFunctions.scala:1089)
+	at org.apache.spark.rdd.PairRDDFunctions.$anonfun$saveAsHadoopFile$4(PairRDDFunctions.scala:1062)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:112)
+	at org.apache.spark.rdd.RDD.withScope(RDD.scala:410)
+	at org.apache.spark.rdd.PairRDDFunctions.saveAsHadoopFile(PairRDDFunctions.scala:1027)
+	at org.apache.spark.rdd.PairRDDFunctions.$anonfun$saveAsHadoopFile$3(PairRDDFunctions.scala:1009)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:112)
+	at org.apache.spark.rdd.RDD.withScope(RDD.scala:410)
+	at org.apache.spark.rdd.PairRDDFunctions.saveAsHadoopFile(PairRDDFunctions.scala:1008)
+	at org.apache.spark.rdd.PairRDDFunctions.$anonfun$saveAsHadoopFile$2(PairRDDFunctions.scala:965)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:112)
+	at org.apache.spark.rdd.RDD.withScope(RDD.scala:410)
+	at org.apache.spark.rdd.PairRDDFunctions.saveAsHadoopFile(PairRDDFunctions.scala:963)
+	at org.apache.spark.rdd.RDD.$anonfun$saveAsTextFile$2(RDD.scala:1623)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:112)
+	at org.apache.spark.rdd.RDD.withScope(RDD.scala:410)
+	at org.apache.spark.rdd.RDD.saveAsTextFile(RDD.scala:1623)
+	at org.apache.spark.rdd.RDD.$anonfun$saveAsTextFile$1(RDD.scala:1609)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)
+	at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:112)
+	at org.apache.spark.rdd.RDD.withScope(RDD.scala:410)
+	at org.apache.spark.rdd.RDD.saveAsTextFile(RDD.scala:1609)
+	at org.apache.spark.api.java.JavaRDDLike.saveAsTextFile(JavaRDDLike.scala:564)
+	at org.apache.spark.api.java.JavaRDDLike.saveAsTextFile$(JavaRDDLike.scala:563)
+	at org.apache.spark.api.java.AbstractJavaRDDLike.saveAsTextFile(JavaRDDLike.scala:45)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:75)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:52)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:244)
+	at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+	at py4j.Gateway.invoke(Gateway.java:282)
+	at py4j.commands.AbstractCommand.invokeMethod(AbstractCommand.java:132)
+	at py4j.commands.CallCommand.execute(CallCommand.java:79)
+	at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+	at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+>>> spark
+<pyspark.sql.session.SparkSession object at 0x7f61d3317230>
+>>> df = (spark.read.option("header", True)
+...            .option("inferSchema", True)
+...            .csv("/user/student/input/restaurants.csv"))
+>>> df.printSchema()
+root
+ |-- restaurant_id: integer (nullable = true)
+ |-- name: string (nullable = true)
+ |-- city: string (nullable = true)
+ |-- cuisine: string (nullable = true)
+ |-- rating: double (nullable = true)
+ |-- price_range: string (nullable = true)
+
+>>> df.show(5)
++-------------+------------------+--------+-------------+------+-----------+
+|restaurant_id|              name|    city|      cuisine|rating|price_range|
++-------------+------------------+--------+-------------+------+-----------+
+|            1|  Restaurant Sahel|    Sfax|    Italienne|   4.6|        bas|
+|            2|  Le Coin de Oasis|Kairouan|Fruits de mer|   3.7|      eleve|
+|            3|Le Coin de Yasmine|   Tunis|    Libanaise|   4.1|        bas|
+|            4|    Villa Hannibal| Bizerte|     Pizzeria|   3.7|        bas|
+|            5|      Chez Zitouna|  Tozeur|    Fast-food|   4.1|      moyen|
++-------------+------------------+--------+-------------+------+-----------+
+only showing top 5 rows
+
+>>> print(df.count())
+80000
+>>> print(df.columns)
+['restaurant_id', 'name', 'city', 'cuisine', 'rating', 'price_range']
+>>> print(sc is spark.sparkContext)
+True
+>>> from pyspark.sql import functions as F
+>>> df.select("name", "city", "rating").show(5)
++------------------+--------+------+
+|              name|    city|rating|
++------------------+--------+------+
+|  Restaurant Sahel|    Sfax|   4.6|
+|  Le Coin de Oasis|Kairouan|   3.7|
+|Le Coin de Yasmine|   Tunis|   4.1|
+|    Villa Hannibal| Bizerte|   3.7|
+|      Chez Zitouna|  Tozeur|   4.1|
++------------------+--------+------+
+only showing top 5 rows
+
+>>> df.filter(F.col("rating") >= 4.5).show(5)
++-------------+----------------+--------+-------------+------+-----------+
+|restaurant_id|            name|    city|      cuisine|rating|price_range|
++-------------+----------------+--------+-------------+------+-----------+
+|            1|Restaurant Sahel|    Sfax|    Italienne|   4.6|        bas|
+|           13|    Villa Kasbah|Monastir|     Pizzeria|   5.0|        bas|
+|           19|   Chez Hannibal|  Nabeul|       Turque|   5.0|      moyen|
+|           25|      Cafe Ribat| Bizerte|Fruits de mer|   5.0|      eleve|
+|           39|    Dar Corniche|Hammamet|Fruits de mer|   4.6|      moyen|
++-------------+----------------+--------+-------------+------+-----------+
+only showing top 5 rows
+
+>>> df.groupBy("city").count().orderBy(F.desc("count")).show()
++--------+-----+
+|    city|count|
++--------+-----+
+|   Tunis|16695|
+|  Sousse| 9188|
+|    Sfax| 9138|
+|  Nabeul| 7626|
+|Hammamet| 6872|
+|  Djerba| 6133|
+|Monastir| 5374|
+| Bizerte| 5227|
+|Kairouan| 4631|
+|  Mahdia| 3838|
+|   Gabes| 3031|
+|  Tozeur| 2247|
++--------+-----+
+
+>>> (df.groupBy("cuisine")
+...    .agg(F.count("*").alias("nb"), F.round(F.avg("rating"), 2).alias("moyenne"))
+...    .orderBy(F.desc("moyenne")).show())
++-------------+----+-------+
+|      cuisine|  nb|moyenne|
++-------------+----+-------+
+|   Tunisienne|8094|   4.08|
+|Fruits de mer|7873|    4.0|
+|    Francaise|8005|    3.9|
+|        Grill|8013|    3.8|
+|    Italienne|7945|   3.79|
+|    Libanaise|8086|   3.69|
+|    Asiatique|7991|   3.61|
+|       Turque|8038|    3.6|
+|     Pizzeria|8071|   3.49|
+|    Fast-food|7884|    3.1|
++-------------+----+-------+
+
+>>> df.withColumn("bien_note", F.col("rating") >= 4).select("name", "bien_note").show(5)
++------------------+---------+
+|              name|bien_note|
++------------------+---------+
+|  Restaurant Sahel|     true|
+|  Le Coin de Oasis|    false|
+|Le Coin de Yasmine|     true|
+|    Villa Hannibal|    false|
+|      Chez Zitouna|     true|
++------------------+---------+
+only showing top 5 rows
+
+>>> df.createOrReplaceTempView("restaurants")
+>>> spark.sql("""
+...   SELECT city, COUNT(*) AS nb_restaurants
+...   FROM restaurants
+...   GROUP BY city
+...   ORDER BY nb_restaurants DESC""").show()
++--------+--------------+
+|    city|nb_restaurants|
++--------+--------------+
+|   Tunis|         16695|
+|  Sousse|          9188|
+|    Sfax|          9138|
+|  Nabeul|          7626|
+|Hammamet|          6872|
+|  Djerba|          6133|
+|Monastir|          5374|
+| Bizerte|          5227|
+|Kairouan|          4631|
+|  Mahdia|          3838|
+|   Gabes|          3031|
+|  Tozeur|          2247|
++--------+--------------+
+
+>>> spark.sql("SELECT cuisine, ROUND(AVG(rating), 2) AS moyenne FROM restaurants GROUP BY cuisine").show()
++-------------+-------+
+|      cuisine|moyenne|
++-------------+-------+
+|    Libanaise|   3.69|
+|    Francaise|    3.9|
+|   Tunisienne|   4.08|
+|       Turque|    3.6|
+|Fruits de mer|    4.0|
+|    Asiatique|   3.61|
+|    Italienne|   3.79|
+|     Pizzeria|   3.49|
+|        Grill|    3.8|
+|    Fast-food|    3.1|
++-------------+-------+
+
+>>> spark.sql("""SELECT city, name, rating FROM restaurants
+...              WHERE rating = (SELECT MAX(rating) FROM restaurants)""").show(5)
++--------+-----------------+------+
+|    city|             name|rating|
++--------+-----------------+------+
+|Monastir|     Villa Kasbah|   5.0|
+|  Nabeul|    Chez Hannibal|   5.0|
+| Bizerte|       Cafe Ribat|   5.0|
+|  Sousse|La Table de Ribat|   5.0|
+|   Tunis|     Villa Elissa|   5.0|
++--------+-----------------+------+
+only showing top 5 rows
+
+>>> df.groupBy("city").count().explain()
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=false
++- HashAggregate(keys=[city#19], functions=[count(1)])
+   +- Exchange hashpartitioning(city#19, 200), ENSURE_REQUIREMENTS, [plan_id=378]
+      +- HashAggregate(keys=[city#19], functions=[partial_count(1)])
+         +- FileScan csv [city#19] Batched: false, DataFilters: [], Format: CSV, Location: InMemoryFileIndex(1 paths)[file:/user/student/input/restaurants.csv], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<city:string>
+
+
+>>> villes = df.groupBy("city").count()
+>>> villes.coalesce(1).write.mode("overwrite").csv("/user/student/spark/df_villes_csv", header=True)
+>>> df.write.mode("overwrite").parquet("/user/student/spark/restaurants_parquet")
+>>> print(spark.read.parquet("/user/student/spark/restaurants_parquet").count())
+80000
+>>> df.write.mode("overwrite").partitionBy("city").parquet("/user/student/spark/restaurants_par_ville")
+>>> spark.read.parquet("/user/student/spark/restaurants_par_ville").filter("city = 'Tunis'").explain()
+== Physical Plan ==
+*(1) ColumnarToRow
++- FileScan parquet [restaurant_id#352,name#353,cuisine#354,rating#355,price_range#356,city#357] Batched: true, DataFilters: [], Format: Parquet, Location: InMemoryFileIndex(1 paths)[file:/user/student/spark/restaurants_par_ville], PartitionFilters: [isnotnull(city#357), (city#357 = Tunis)], PushedFilters: [], ReadSchema: struct<restaurant_id:int,name:string,cuisine:string,rating:double,price_range:string>
+
+
+>>> spark.conf.get("spark.sql.catalogImplementation")
+'hive'
+>>> spark.sql("SHOW DATABASES").show()
++---------+
+|namespace|
++---------+
+|  default|
+|     rsi3|
++---------+
+
+>>> spark.sql("USE rsi3")
+DataFrame[]
+>>> spark.sql("SHOW TABLES").show()
++---------+-----------+-----------+
+|namespace|  tableName|isTemporary|
++---------+-----------+-----------+
+|     rsi3|restaurants|      false|
+|         |restaurants|       true|
++---------+-----------+-----------+
+
+>>> spark.sql("""SELECT city, COUNT(*) AS nb
+...              FROM restaurants
+...              WHERE restaurant_id IS NOT NULL
+...              GROUP BY city ORDER BY nb DESC""").show()
++--------+-----+
+|    city|   nb|
++--------+-----+
+|   Tunis|16695|
+|  Sousse| 9188|
+|    Sfax| 9138|
+|  Nabeul| 7626|
+|Hammamet| 6872|
+|  Djerba| 6133|
+|Monastir| 5374|
+| Bizerte| 5227|
+|Kairouan| 4631|
+|  Mahdia| 3838|
+|   Gabes| 3031|
+|  Tozeur| 2247|
++--------+-----+
+
+>>> spark.table("rsi3.restaurants").printSchema()
+root
+ |-- restaurant_id: integer (nullable = true)
+ |-- name: string (nullable = true)
+ |-- city: string (nullable = true)
+ |-- cuisine: string (nullable = true)
+ |-- rating: double (nullable = true)
+ |-- price_range: string (nullable = true)
+
+>>> spark.sql("""
+...   CREATE TABLE IF NOT EXISTS rsi3.villes_spark
+...   STORED AS PARQUET
+...   AS SELECT city, COUNT(*) AS nb_restaurants
+...      FROM rsi3.restaurants WHERE restaurant_id IS NOT NULL
+...      GROUP BY city""")
+DataFrame[]
+>>> spark.sql("SELECT * FROM rsi3.villes_spark ORDER BY nb_restaurants DESC").show()
++--------+--------------+
+|    city|nb_restaurants|
++--------+--------------+
+|   Tunis|         16695|
+|  Sousse|          9188|
+|    Sfax|          9138|
+|  Nabeul|          7626|
+|Hammamet|          6872|
+|  Djerba|          6133|
+|Monastir|          5374|
+| Bizerte|          5227|
+|Kairouan|          4631|
+|  Mahdia|          3838|
+|   Gabes|          3031|
+|  Tozeur|          2247|
++--------+--------------+
+
+>>> moy = (spark.table("rsi3.restaurants").filter("restaurant_id IS NOT NULL")
+...             .groupBy("cuisine").agg(F.round(F.avg("rating"), 2).alias("moyenne")))
+>>> moy.write.mode("overwrite").format("hive").saveAsTable("rsi3.cuisines_spark")
+>>> spark.sql("SHOW TABLES IN rsi3").show()
+... 
++---------+--------------+-----------+
+|namespace|     tableName|isTemporary|
++---------+--------------+-----------+
+|     rsi3|cuisines_spark|      false|
+|     rsi3|   restaurants|      false|
+|     rsi3|  villes_spark|      false|
+|         |   restaurants|       true|
++---------+--------------+-----------+
+
+
+--- spark-submit spark_tp_rdd.py ---
+Nombre de restaurants : 80000
+TOP Tunis 16695
+TOP Sousse 9188
+TOP Sfax 9138
+TOP Nabeul 7626
+TOP Hammamet 6872
+
+--- spark-submit spark_df_hive.py ---
+Restaurants : 80000
++--------+-----+------------+
+|city    |nb   |note_moyenne|
++--------+-----+------------+
+|Tunis   |16695|3.71        |
+|Sousse  |9188 |3.71        |
+|Sfax    |9138 |3.69        |
+|Nabeul  |7626 |3.72        |
+|Hammamet|6872 |3.7         |
+|Djerba  |6133 |3.71        |
+|Monastir|5374 |3.69        |
+|Bizerte |5227 |3.72        |
+|Kairouan|4631 |3.69        |
+|Mahdia  |3838 |3.72        |
++--------+-----+------------+
+only showing top 10 rows
+

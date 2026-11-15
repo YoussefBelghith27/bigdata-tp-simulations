@@ -126,6 +126,27 @@ window.CATALOG = {
    "slides": 60,
    "commands": 50,
    "clicks": 0
+  },
+  {
+   "id": "tp6-spark",
+   "group": "hadoop",
+   "num": "TP6",
+   "title": "Spark sur un cluster Hadoop : RDD, DataFrame, Spark SQL et Hive",
+   "desc": "Les 19 activités dans PySpark sur YARN : SparkContext, parallelize et glom, transformations et actions, reduceByKey, texte et CSV HDFS, cache, repartition, saveAsTextFile, spark-submit, DataFrame, Spark SQL et explain, Parquet partitionné, puis lecture et écriture de tables Hive.",
+   "cmds": [
+    "pyspark --master yarn",
+    "rdd.glom().collect()",
+    "df.groupBy(\"city\").count().explain()",
+    "moy.write.format(\"hive\").saveAsTable(...)"
+   ],
+   "cr": "cr/CR_TP6_Spark_Cluster_Hadoop.pdf",
+   "approj": "activepresenter/TP6_Spark_Cluster_Hadoop_Simulation.approj",
+   "tool": "PySpark 3.5.3 · YARN · Hive",
+   "origin": "Sorties PySpark réelles, messages YARN reconstitués",
+   "real": false,
+   "slides": 101,
+   "commands": 68,
+   "clicks": 0
   }
  ]
 };

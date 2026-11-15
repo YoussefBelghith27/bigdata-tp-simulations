@@ -1,0 +1,296 @@
+##SETUP
+spark.sql("CREATE DATABASE IF NOT EXISTS rsi3")
+spark.sql("DROP TABLE IF EXISTS rsi3.restaurants")
+spark.sql("CREATE EXTERNAL TABLE rsi3.restaurants (restaurant_id INT, name STRING, city STRING, cuisine STRING, rating DOUBLE, price_range STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE LOCATION '/user/student/input' TBLPROPERTIES ('skip.header.line.count'='1')")
+spark.sql("DROP TABLE IF EXISTS rsi3.villes_spark"); spark.sql("DROP TABLE IF EXISTS rsi3.cuisines_spark")
+#--
+sc
+#--
+print(sc.version)
+#--
+print(sc.master)
+#--
+print(sc.appName)
+#--
+print(sc.defaultParallelism)
+#--
+nombres = sc.parallelize(range(1, 11))
+#--
+print(type(nombres))
+#--
+print(nombres.collect())
+#--
+grand = sc.parallelize(range(1, 101), 4)
+#--
+print(grand.getNumPartitions())
+#--
+fruits = sc.parallelize(["pomme", "banane", "orange"])
+#--
+print(fruits.collect())
+#--
+notes = sc.parallelize([("Ali", 14), ("Sana", 17), ("Omar", 12)])
+#--
+print(notes.collect())
+#--
+rdd = sc.parallelize(range(1, 13), 3)
+#--
+print(rdd.getNumPartitions())
+#--
+print(rdd.glom().collect())
+#--
+print(rdd.glom().map(len).collect())
+#--
+print(rdd.mapPartitionsWithIndex(
+    lambda i, it: [(i, sum(it))]).collect())
+#--
+print(sc.parallelize(range(1, 13), 5).glom().collect())
+#--
+carres = nombres.map(lambda x: x * x)
+#--
+pairs = nombres.filter(lambda x: x % 2 == 0)
+#--
+print(carres.collect())
+#--
+print(pairs.collect())
+#--
+phrases = sc.parallelize([
+    "spark traite les données",
+    "spark utilise les RDD",
+    "les données sont distribuées"])
+#--
+mots = phrases.flatMap(lambda p: p.split())
+#--
+print(mots.collect())
+#--
+uniques = mots.distinct()
+#--
+print(uniques.count())
+#--
+print(phrases.map(lambda p: p.split()).collect())
+#--
+print(nombres.count())
+#--
+print(nombres.first())
+#--
+print(nombres.take(3))
+#--
+print(nombres.top(3))
+#--
+print(nombres.reduce(lambda a, b: a + b))
+#--
+print(nombres.sum(), nombres.max(), nombres.mean())
+#--
+print(nombres.takeOrdered(4))
+#--
+print(sc.parallelize(range(1, 7)).reduce(lambda a, b: a * b))
+#--
+paires = mots.map(lambda m: (m, 1))
+#--
+freq = paires.reduceByKey(lambda a, b: a + b)
+#--
+tri = freq.sortBy(lambda kv: kv[1], ascending=False)
+#--
+print(tri.take(5))
+#--
+freq2 = paires.groupByKey().mapValues(sum)
+#--
+print(sorted(freq2.collect()))
+#--
+chemin = "/user/student/spark/texte.txt"
+#--
+lignes = sc.textFile(chemin)
+#--
+print("Lignes :", lignes.count())
+#--
+mots = lignes.flatMap(lambda l: l.split())
+#--
+print("Mots :", mots.count())
+#--
+print("Mots distincts :", mots.distinct().count())
+#--
+freq = mots.map(lambda m: (m.lower(), 1)).reduceByKey(lambda a, b: a + b)
+#--
+print(freq.sortBy(lambda kv: -kv[1]).take(5))
+#--
+avec_hdfs = lignes.filter(lambda l: "HDFS" in l)
+#--
+print(avec_hdfs.collect())
+#--
+print("Plus longue ligne :", lignes.map(len).max())
+#--
+import csv
+#--
+brut = sc.textFile("/user/student/input/restaurants.csv")
+#--
+entete = brut.first()
+#--
+donnees = brut.filter(lambda l: l != entete)
+#--
+def parse(ligne):
+    return next(csv.reader([ligne]))
+#--
+restos = donnees.map(parse)
+#--
+print(restos.take(2))
+#--
+par_ville = restos.map(lambda r: (r[2], 1)).reduceByKey(lambda a, b: a + b)
+#--
+print(par_ville.sortBy(lambda kv: -kv[1]).collect())
+#--
+par_cuisine = restos.map(lambda r: (r[3], 1)).reduceByKey(lambda a, b: a + b)
+#--
+print(par_cuisine.sortBy(lambda kv: -kv[1]).collect())
+#--
+def valide(r):
+    try:
+        float(r[4]); return True
+    except (ValueError, IndexError):
+        return False
+#--
+valides = restos.filter(valide)
+#--
+somme = valides.map(lambda r: (r[3], (float(r[4]), 1))) \
+               .reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1]))
+#--
+moyennes = somme.mapValues(lambda s: round(s[0] / s[1], 2))
+#--
+print(moyennes.sortBy(lambda kv: -kv[1]).collect())
+#--
+print(par_ville.values().sum(), restos.count())
+#--
+import time
+#--
+from pyspark import StorageLevel
+#--
+def chrono(rdd):
+    t0 = time.time()
+    n = rdd.count()
+    return n, round(time.time() - t0, 3)
+#--
+print("sans cache :", chrono(valides), chrono(valides))
+#--
+valides.cache()
+#--
+print("cache()    :", chrono(valides), chrono(valides))
+#--
+print(valides.is_cached, valides.getStorageLevel())
+#--
+valides.unpersist()
+#--
+valides.persist(StorageLevel.MEMORY_AND_DISK)
+#--
+print(chrono(valides), chrono(valides))
+#--
+valides.unpersist()
+#--
+print("Partitions initiales :", restos.getNumPartitions())
+#--
+plus = restos.repartition(6)
+#--
+print(plus.getNumPartitions(), plus.glom().map(len).collect())
+#--
+moins = plus.coalesce(2)
+#--
+print(moins.getNumPartitions(), moins.glom().map(len).collect())
+#--
+un = par_ville.coalesce(1)
+#--
+print(un.getNumPartitions())
+#--
+sortie = "/user/student/spark/output_villes"
+#--
+resultat = par_ville.map(lambda kv: kv[0] + "," + str(kv[1]))
+#--
+resultat.saveAsTextFile(sortie)
+#--
+resultat.coalesce(1).saveAsTextFile(sortie + "_un_fichier")
+#--
+resultat.saveAsTextFile(sortie)
+#--
+spark
+#--
+df = (spark.read.option("header", True)
+           .option("inferSchema", True)
+           .csv("/user/student/input/restaurants.csv"))
+#--
+df.printSchema()
+#--
+df.show(5)
+#--
+print(df.count())
+#--
+print(df.columns)
+#--
+print(sc is spark.sparkContext)
+#--
+from pyspark.sql import functions as F
+#--
+df.select("name", "city", "rating").show(5)
+#--
+df.filter(F.col("rating") >= 4.5).show(5)
+#--
+df.groupBy("city").count().orderBy(F.desc("count")).show()
+#--
+(df.groupBy("cuisine")
+   .agg(F.count("*").alias("nb"), F.round(F.avg("rating"), 2).alias("moyenne"))
+   .orderBy(F.desc("moyenne")).show())
+#--
+df.withColumn("bien_note", F.col("rating") >= 4).select("name", "bien_note").show(5)
+#--
+df.createOrReplaceTempView("restaurants")
+#--
+spark.sql("""
+  SELECT city, COUNT(*) AS nb_restaurants
+  FROM restaurants
+  GROUP BY city
+  ORDER BY nb_restaurants DESC""").show()
+#--
+spark.sql("SELECT cuisine, ROUND(AVG(rating), 2) AS moyenne FROM restaurants GROUP BY cuisine").show()
+#--
+spark.sql("""SELECT city, name, rating FROM restaurants
+             WHERE rating = (SELECT MAX(rating) FROM restaurants)""").show(5)
+#--
+df.groupBy("city").count().explain()
+#--
+villes = df.groupBy("city").count()
+#--
+villes.coalesce(1).write.mode("overwrite").csv("/user/student/spark/df_villes_csv", header=True)
+#--
+df.write.mode("overwrite").parquet("/user/student/spark/restaurants_parquet")
+#--
+print(spark.read.parquet("/user/student/spark/restaurants_parquet").count())
+#--
+df.write.mode("overwrite").partitionBy("city").parquet("/user/student/spark/restaurants_par_ville")
+#--
+spark.read.parquet("/user/student/spark/restaurants_par_ville").filter("city = 'Tunis'").explain()
+#--
+spark.conf.get("spark.sql.catalogImplementation")
+#--
+spark.sql("SHOW DATABASES").show()
+#--
+spark.sql("USE rsi3")
+#--
+spark.sql("SHOW TABLES").show()
+#--
+spark.sql("""SELECT city, COUNT(*) AS nb
+             FROM restaurants
+             WHERE restaurant_id IS NOT NULL
+             GROUP BY city ORDER BY nb DESC""").show()
+#--
+spark.table("rsi3.restaurants").printSchema()
+#--
+spark.sql("""
+  CREATE TABLE IF NOT EXISTS rsi3.villes_spark
+  STORED AS PARQUET
+  AS SELECT city, COUNT(*) AS nb_restaurants
+     FROM rsi3.restaurants WHERE restaurant_id IS NOT NULL
+     GROUP BY city""")
+#--
+spark.sql("SELECT * FROM rsi3.villes_spark ORDER BY nb_restaurants DESC").show()
+#--
+moy = (spark.table("rsi3.restaurants").filter("restaurant_id IS NOT NULL")
+            .groupBy("cuisine").agg(F.round(F.avg("rating"), 2).alias("moyenne")))
+#--
+moy.write.mode("overwrite").format("hive").saveAsTable("rsi3.cuisines_spark")
+#--
+spark.sql("SHOW TABLES IN rsi3").show()

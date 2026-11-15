@@ -36,6 +36,11 @@ T = [
          cmds=["hdfs dfsadmin -report", "hdfs fsck /user/student/input/restaurants.csv -files -blocks -locations", "hadoop jar hadoop-streaming-3.3.6.jar ...", "spark-submit --master yarn spark_rdd.py"],
          cr="cr/CR_TP5_Hadoop_Spark_Hive.pdf", approj="activepresenter/TP5_Hadoop_Spark_Hive_Simulation.approj",
          tool="Hadoop 3.3.6 · Spark 3.5.3 · Hive 3.1.3", origin="Calculs réels (scripts, PySpark), messages Hadoop reconstitués", real=False),
+    dict(id="tp6-spark", group="hadoop", num="TP6", title="Spark sur un cluster Hadoop : RDD, DataFrame, Spark SQL et Hive",
+         desc="Les 19 activités dans PySpark sur YARN : SparkContext, parallelize et glom, transformations et actions, reduceByKey, texte et CSV HDFS, cache, repartition, saveAsTextFile, spark-submit, DataFrame, Spark SQL et explain, Parquet partitionné, puis lecture et écriture de tables Hive.",
+         cmds=["pyspark --master yarn", "rdd.glom().collect()", "df.groupBy(\"city\").count().explain()", "moy.write.format(\"hive\").saveAsTable(...)"],
+         cr="cr/CR_TP6_Spark_Cluster_Hadoop.pdf", approj="activepresenter/TP6_Spark_Cluster_Hadoop_Simulation.approj",
+         tool="PySpark 3.5.3 · YARN · Hive", origin="Sorties PySpark réelles, messages YARN reconstitués", real=False),
 ]
 for t in T:
     if not t.get("soon"):
