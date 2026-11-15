@@ -3,6 +3,87 @@
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const ready = C.tps.filter(t => !t.soon);
 
+  /* ---------- Carte des TP (cluster animé) ---------- */
+  (function topo() {
+    const svg = document.getElementById("topo"); if (!svg) return;
+    const tip = document.getElementById("topo-tip");
+    const NS = "http://www.w3.org/2000/svg";
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+    const byId = Object.fromEntries(C.tps.map(t => [t.id, t]));
+    // couleur par technologie : [haut, corps, bas]
+    const TECH = { mongo: ["#4fbf86", "#13aa52", "#0b7a53"], cass: ["#5cc3e6", "#1287b1", "#0b5f7e"],
+                   hadoop: ["#ffd75a", "#e6b000", "#a67e00"], spark: ["#ff9a63", "#e25a1c", "#a63d0e"] };
+    const N = {
+      "tp1-installation":         { p: [104, 112], t: "mongo",  s: "Installation" },
+      "tp2-resto":                { p: [280, 96],  t: "mongo",  s: "Requêtes find()" },
+      "tp3-replication-sharding": { p: [150, 222], t: "mongo",  s: "Réplication, sharding" },
+      "tp4-cassandra":            { p: [580, 120], t: "cass",   s: "Anneau Cassandra" },
+      "tp5-hadoop":               { p: [330, 352], t: "hadoop", s: "HDFS, MapReduce, Hive" },
+      "tp6-spark":                { p: [580, 352], t: "spark",  s: "Spark sur YARN" },
+    };
+    const L = [["tp1-installation", "tp2-resto"], ["tp1-installation", "tp3-replication-sharding"],
+               ["tp2-resto", "tp4-cassandra"], ["tp3-replication-sharding", "tp5-hadoop"], ["tp5-hadoop", "tp6-spark"],
+               ["tp4-cassandra", "tp6-spark"], ["tp3-replication-sharding", "tp2-resto"]];
+    // zones (comme le nuage Frame Relay du site WAN)
+    const Z = [
+      { x: 24, y: 24, w: 390, h: 268, fill: "#eaf7f0", stroke: "#8fd1ae", c: "#0b7a53", label: "MongoDB · document" },
+      { x: 466, y: 24, w: 230, h: 200, fill: "#e8f5fb", stroke: "#8cc9e0", c: "#0b5f7e", label: "Cassandra · colonnes" },
+      { x: 236, y: 296, w: 460, h: 134, fill: "#fff7e0", stroke: "#e8c96a", c: "#8a6a00", label: "Hadoop · Spark" },
+    ];
+    Z.forEach(z => {
+      el("rect", { x: z.x, y: z.y, width: z.w, height: z.h, rx: 12, fill: z.fill, stroke: z.stroke, class: "zone" }, svg);
+      el("text", { x: z.x + 14, y: z.y + 20, class: "zone-label", fill: z.c }, svg).textContent = z.label;
+    });
+    const links = el("g", {}, svg), dots = el("g", {}, svg), packets = el("g", {}, svg), nodes = el("g", {}, svg);
+    L.forEach(([a, b], i) => {
+      if (!N[a] || !N[b]) return;
+      const [x1, y1] = N[a].p, [x2, y2] = N[b].p;
+      const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len;
+      const mx = (x1 + x2) / 2 - uy * 18, my = (y1 + y2) / 2 + ux * 18;   // légère courbe
+      const path = el("path", { d: `M${x1},${y1} Q${mx.toFixed(1)},${my.toFixed(1)} ${x2},${y2}`, id: "lk" + i, class: "link" + (reduce ? "" : " draw"), pathLength: 1 }, links);
+      path.style.animationDelay = (0.15 + i * 0.09) + "s";
+      [[x1 + ux * 40, y1 + uy * 40], [x2 - ux * 40, y2 - uy * 40]].forEach(([cx, cy]) => {
+        const c = el("circle", { cx, cy, r: 3.6, class: "portdot" }, dots);
+        c.style.animationDelay = (1.3 + i * 0.05) + "s"; if (reduce) c.style.opacity = 1;
+      });
+      if (!reduce) [0, 1].forEach(k => {
+        const begin = (2 + i * 0.37 + k * 1.8) + "s";
+        const pk = el("circle", { r: 3.4, class: "packet", cx: 0, cy: 0, visibility: "hidden" }, packets);
+        el("set", { attributeName: "visibility", to: "visible", begin }, pk);
+        const am = el("animateMotion", { dur: (3.2 + (i % 4) * 0.7) + "s", repeatCount: "indefinite",
+          begin, keyPoints: k ? "1;0" : "0;1", keyTimes: "0;1", calcMode: "linear" }, pk);
+        el("mpath", { href: "#lk" + i }, am);
+      });
+    });
+    Object.entries(N).forEach(([id, n], i) => {
+      const t = byId[id]; if (!t) return;
+      const [x, y] = n.p, [top, body, bot] = TECH[n.t];
+      const href = t.soon ? "#" + id : `simulation.html?tp=${id}`;
+      const a = el("a", { href, class: "node", "aria-label": `${t.num} : ${t.title}` }, nodes);
+      a.style.animationDelay = (0.5 + i * 0.1) + "s"; if (reduce) a.style.opacity = 1;
+      const g = el("g", { transform: `translate(${x},${y})` }, a);
+      el("circle", { r: 46, fill: body, class: "halo" }, g);
+      const b = el("g", { class: "body" }, el("g", { transform: "scale(1.22)" }, g));
+      if (n.t === "cass") el("circle", { r: 38, class: "ring" }, b);
+      // cylindre (base de données)
+      el("path", { d: "M-26,-14 v30 c0,7 12,12 26,12 s26,-5 26,-12 v-30z", fill: body }, b);
+      el("path", { d: "M-26,1 c0,7 12,12 26,12 s26,-5 26,-12", stroke: bot, "stroke-width": 2, fill: "none" }, b);
+      el("ellipse", { cx: 0, cy: -14, rx: 26, ry: 10, fill: top }, b);
+      el("text", { x: 0, y: 12, class: "tag" }, b).textContent = t.num;
+      el("text", { x: 0, y: 52 }, g).textContent = t.num;
+      el("text", { x: 0, y: 67, class: "sub" }, g).textContent = n.s;
+      const show = () => {
+        const r = svg.getBoundingClientRect(), box = svg.parentElement.getBoundingClientRect(), k = r.width / 720;
+        tip.innerHTML = `<b>${esc(t.num)} · ${esc(t.title)}</b><span>${t.soon ? "Bientôt disponible" : `${t.slides} diapositives · ${t.commands} saisies — cliquez pour lancer`}</span>`;
+        tip.style.left = (r.left - box.left + x * k) + "px"; tip.style.top = (r.top - box.top + (y + 72) * k) + "px";
+        tip.hidden = false;
+      };
+      a.addEventListener("mouseenter", show); a.addEventListener("focus", show);
+      a.addEventListener("mouseleave", () => tip.hidden = true); a.addEventListener("blur", () => tip.hidden = true);
+    });
+  })();
+
   const nS = ready.reduce((a, t) => a + t.slides, 0), nC = ready.reduce((a, t) => a + t.commands, 0), nK = ready.reduce((a, t) => a + (t.clicks || 0), 0);
   document.getElementById("totals").textContent =
     `${ready.length} TP disponible${ready.length > 1 ? "s" : ""} : ${nS} diapositives, ${nC} saisies${nK ? ` et ${nK} clics guidés` : ""}, sans rien installer.`;
